@@ -17,11 +17,12 @@ package canny_header is
   constant BLOCK_SIZE     : positive := 9 ;
   
   -- CUSTOM TYPE ---------------------------------------------------------------------------------
-  subtype grd_magn  is std_logic_vector(WIDTH_GRD_MAGN-1 downto 0) ;
-  subtype grd_dir   is std_logic_vector(WIDTH_GRD_DIR-1 downto 0) ;
+  subtype grd_magn   is std_logic_vector(WIDTH_GRD_MAGN-1 downto 0) ;
+  subtype grd_dir    is std_logic_vector(WIDTH_GRD_DIR-1 downto 0) ;
   
   -- Unsigned versions
-  subtype grd_dir_u is unsigned(WIDTH_GRD_DIR-1 downto 0) ;
+  subtype grd_magn_u is unsigned(WIDTH_GRD_MAGN-1 downto 0) ;
+  subtype grd_dir_u  is unsigned(WIDTH_GRD_DIR-1 downto 0) ;
   
   -- Magnitdue/direction pair record type
   type grd_pair is record
