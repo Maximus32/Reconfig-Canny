@@ -46,7 +46,6 @@ architecture behavior of controller is
     if rst = '1' then
       done <= '0';
       valid_data <= '0';
-      --addr_out_en <= '0';
       addr_in_en <= '0';
       rst_addr <= '1';
       PIPE_CLEAR <= (others => '0');

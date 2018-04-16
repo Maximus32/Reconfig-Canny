@@ -29,6 +29,8 @@ entity memory_map is
         -- app-specific signals
         go              : out std_logic;
         size            : out std_logic_vector(C_MEM_ADDR_WIDTH downto 0);
+        num_rows        : out std_logic_vector(C_MEM_ADDR_WIDTH downto 0);
+        num_cols        : out std_logic_vector(C_MEM_ADDR_WIDTH downto 0);
         done            : in  std_logic;
         mem_in_wr_data  : out std_logic_vector(C_MEM_IN_WIDTH-1 downto 0);
         mem_in_wr_addr  : out std_logic_vector(C_MEM_ADDR_WIDTH-1 downto 0);
@@ -42,6 +44,8 @@ architecture BHV of memory_map is
 
     signal reg_go      : std_logic;
     signal reg_size    : std_logic_vector(C_MEM_ADDR_WIDTH downto 0);
+    signal reg_rows    : std_logic_vector(C_MEM_ADDR_WIDTH downto 0);
+    signal reg_cols    : std_logic_vector(C_MEM_ADDR_WIDTH downto 0);
     signal reg_rd_data : std_logic_vector(C_MMAP_DATA_WIDTH-1 downto 0);
     signal rd_data_sel : std_logic;
 
@@ -60,6 +64,8 @@ begin
         if (rst = '1') then
             reg_go   <= '0';
             reg_size <= (others => '0');
+            reg_rows <= (others => '0');
+            reg_cols <= (others => '0');
             rd_data_sel <= '0';
             reg_rd_data <= (others => '0');
 
@@ -74,6 +80,10 @@ begin
                         reg_go <= wr_data(0); --when writing to the go address in memory
                     when C_SIZE_ADDR =>
                         reg_size <= wr_data(reg_size'range); --when writing to the size register
+                    when C_ROWS_ADDR =>
+                        reg_rows <= wr_data(reg_rows'range); --when writing to the #rows register
+                    when C_COLS_ADDR =>
+                        reg_cols <= wr_data(reg_cols'range); --when writing to the #cols register
                     when others => null;
                 end case;
             end if;
@@ -99,6 +109,12 @@ begin
                         reg_rd_data(reg_size'range) <= reg_size;
                     when C_DONE_ADDR =>
                         reg_rd_data <= std_logic_vector(to_unsigned(0, C_MMAP_DATA_WIDTH-1)) & done;
+                    when C_ROWS_ADDR =>
+                        reg_rd_data <= (other => '0');
+                        reg_rd_data <= reg_rows'range) <= reg_rows;
+                    when C_COLS_ADDR =>
+                        reg_rd_data <= (other => '0');
+                        reg_rd_data <= reg_cols'range) <= reg_cols;
                     when others => null;
                 end case;
             end if;
@@ -108,7 +124,8 @@ begin
 
     go   <= reg_go;
     size <= reg_size;
-
+    num_rows <= reg_rows;
+    num_cols <= reg_cols;
     -- mux that defines dout based on where the read data come from
     process(rd_data_sel, reg_rd_data, mem_out_rd_data)
     begin

@@ -6,19 +6,19 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity reg_sync is
-  generic(
-    reg_width : positive
-  );
   port(
-    clk      : in std_logic;
-    rst      : in std_logic;
-    data_in  : in std_logic;
-    data_out : out std_logic
+    clk        : in std_logic;
+    rst        : in std_logic;
+    delay_time : in std_logic_vector(C_MEM_ADDR_WIDTH downto 0);
+    data_in    : in std_logic;
+    data_out   : out std_logic
   );
 end reg_sync;
 
 architecture behavior of reg_sync is
 
+  signal counter : std_logic_vector(C_MEM_ADDR_WIDTH downto 0) := (others => '0'); --counter to determine delay output
+  --the number of cols is delay_time
 begin
 
   process(clk, rst)
@@ -26,8 +26,14 @@ begin
 
     if rst = '1' then
       data_out <= '0';
+      counter <= (others => '0');
     elsif clk'event and clk = '1' then
-      data_out <= data_in;
+      if unsigned(counter) = unsigned(delay_time - 1) then
+        data_out <= data_in;
+      else
+        data_out <= '0';
+        counter <= std_logic_vector(unsigned(counter) + 1);
+      end if;
     end if;
 
   end process;

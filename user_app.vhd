@@ -25,9 +25,11 @@ end user_app;
 
 architecture default of user_app is
 
-    signal go   : std_logic;
-    signal size : std_logic_vector(C_MEM_ADDR_WIDTH downto 0);
-    signal done : std_logic;
+    signal go       : std_logic;
+    signal size     : std_logic_vector(C_MEM_ADDR_WIDTH downto 0);
+    signal num_rows : std_logic_vector(C_MEM_ADDR_WIDTH downto 0);
+    signal num_cols : std_logic_vector(C_MEM_ADDR_WIDTH downto 0);
+    signal done     : std_logic;
 
     signal mem_in_wr_data       : std_logic_vector(C_MEM_IN_WIDTH-1 downto 0);
     signal mem_in_wr_addr       : std_logic_vector(C_MEM_ADDR_WIDTH-1 downto 0);
@@ -72,6 +74,8 @@ begin
 
 			-- TODO: connect to appropriate logic
             go              => go,
+            num_rows        => num_rows,
+            num_cols        => num_cols,
             size            => size,
             done            => done,
 
@@ -109,6 +113,7 @@ begin
       port map(
         clk => clk,
         rst => reset_addresses,
+        delay_time => num_cols, --this comes from the memory_map and will be used to determine the delay for an entire row of image
         data_in => mem_in_wr_en,
         data_out => wr_en_2
       );
@@ -145,6 +150,7 @@ begin
       port map(
         clk => clk,
         rst => reset_addresses,
+        delay_time => num_cols,
         data_in => wr_en_2,
         data_out => wr_en_3
       );
@@ -198,15 +204,15 @@ begin
 
 
 	-- TODO: INCLUDE DATA_PATH FROM MAX. THIS IS THE DATA_PATH FROM LAB5 CURRENTLY
-	data_path : entity work.datapath
-	   port map(
-	      clk => clk,
-	      rst => rst,
-	      in_data => mem_in_rd_data,
-	      valid_in => valid_in_bit,
-	      valid_out => mem_out_wr_en,
-	      out_data => mem_out_wr_data
-	   );
+--	data_path : entity work.datapath
+--	   port map(
+--	      clk => clk,
+--	      rst => rst,
+--	      in_data => mem_in_rd_data,
+--	      valid_in => valid_in_bit,
+--	      valid_out => mem_out_wr_en,
+--	      out_data => mem_out_wr_data
+--	   );
 
   mem_in_address : entity work.addr_gen
     generic map (
