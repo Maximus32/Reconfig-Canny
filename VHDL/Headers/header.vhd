@@ -16,6 +16,10 @@ package canny_header is
   -- Number of pixels in a block
   constant BLOCK_SIZE     : positive := 9 ;
   
+  -- High and low threshold values
+  constant THRESHOLD_HIGH : positive := 50 ;
+  constant THRESHOLD_LOW  : positive := 10 ;
+  
   -- CUSTOM TYPE ---------------------------------------------------------------------------------
   subtype grd_magn   is std_logic_vector(WIDTH_GRD_MAGN-1 downto 0) ;
   subtype grd_dir    is std_logic_vector(WIDTH_GRD_DIR-1 downto 0) ;
