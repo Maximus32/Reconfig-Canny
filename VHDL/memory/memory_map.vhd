@@ -110,11 +110,11 @@ begin
                     when C_DONE_ADDR =>
                         reg_rd_data <= std_logic_vector(to_unsigned(0, C_MMAP_DATA_WIDTH-1)) & done;
                     when C_ROWS_ADDR =>
-                        reg_rd_data <= (other => '0');
-                        reg_rd_data <= reg_rows'range) <= reg_rows;
+                        reg_rd_data <= (others => '0');
+                        reg_rd_data(reg_rows'range) <= reg_rows;
                     when C_COLS_ADDR =>
-                        reg_rd_data <= (other => '0');
-                        reg_rd_data <= reg_cols'range) <= reg_cols;
+                        reg_rd_data <= (others => '0');
+                        reg_rd_data(reg_cols'range) <= reg_cols;
                     when others => null;
                 end case;
             end if;

@@ -5,6 +5,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.config_pkg.all;
+use work.user_pkg.all;
+
 entity reg_sync is
   port(
     clk        : in std_logic;
@@ -28,7 +31,7 @@ begin
       data_out <= '0';
       counter <= (others => '0');
     elsif clk'event and clk = '1' then
-      if unsigned(counter) = unsigned(delay_time - 1) then
+      if counter = std_logic_vector(resize(unsigned(delay_time)-1, C_MEM_ADDR_WIDTH-1)) then
         data_out <= data_in;
       else
         data_out <= '0';
