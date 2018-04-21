@@ -31,7 +31,7 @@ begin
       data_out <= '0';
       counter <= (others => '0');
     elsif clk'event and clk = '1' then
-      if counter = std_logic_vector(resize(unsigned(delay_time)-1, C_MEM_ADDR_WIDTH-1)) then
+      if counter = std_logic_vector(resize(unsigned(delay_time)-1, C_MEM_ADDR_WIDTH+1)) then
         data_out <= data_in;
       else
         data_out <= '0';
