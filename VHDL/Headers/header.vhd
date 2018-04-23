@@ -21,12 +21,8 @@ package canny_header is
   constant THRESHOLD_LOW  : positive := 10 ;
   
   -- CUSTOM TYPE ---------------------------------------------------------------------------------
-  subtype grd_magn   is std_logic_vector(WIDTH_GRD_MAGN-1 downto 0) ;
-  subtype grd_dir    is std_logic_vector(WIDTH_GRD_DIR-1 downto 0) ;
-  
-  -- Unsigned versions
-  subtype grd_magn_u is unsigned(WIDTH_GRD_MAGN-1 downto 0) ;
-  subtype grd_dir_u  is unsigned(WIDTH_GRD_DIR-1 downto 0) ;
+  subtype grd_magn   is unsigned(WIDTH_GRD_MAGN-1 downto 0) ;
+  subtype grd_dir    is unsigned(WIDTH_GRD_DIR-1 downto 0) ;
   
   -- Magnitdue/direction pair record type
   type grd_pair is record
@@ -69,8 +65,9 @@ package canny_header is
   type grd_magn_set is array (0 to COUNT_GRD_DIR-1) of grd_magn ;
   
   -- Function declarations
-  function log2 (num : integer) return integer;
-  function cnv (num : integer; size : integer) return std_logic_vector;
+  function log2 (num : positive) return integer;
+  function cnv (num : integer; size : positive) return std_logic_vector;
+  function cnv_u (num : integer; size : positive) return unsigned;
   function cnv_to_int (input : std_logic_vector) return integer;
   function cnv_to_int (input : unsigned) return integer;
 end canny_header ;
@@ -79,7 +76,7 @@ package body canny_header is
   
   -- Function "log2"
   -- Returns the ceiling-ed base-2 logarithm of 'num'
-  function log2 (num : integer) return integer is
+  function log2 (num : positive) return integer is
   begin
     for i in 0 to num loop
       next when 2**i < num;
@@ -89,10 +86,17 @@ package body canny_header is
   
   -- Function "cnv"
   -- Returns the 'std_logic_vector' form of 'num'
-  function cnv (num : integer; size : integer) return std_logic_vector is
+  function cnv (num : integer; size : positive) return std_logic_vector is
   begin
     return std_logic_vector(to_unsigned(num, size));
   end cnv;
+  
+  -- Function "cnv_u"
+  -- Returns the 'unsigned' form of 'num'
+  function cnv_u (num : integer; size : positive) return unsigned is
+  begin
+    return to_unsigned(num, size);
+  end cnv_u;
   
   -- Function "cnv_to_int"
   -- Accepts 'input' of "std_logic_vector"

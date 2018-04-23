@@ -26,8 +26,8 @@ end entity ;
 architecture ARCH_NMS_BLK_A_0 of nms_block_A is
 begin
   process(clk)
-    variable grd_dir_2plus  : grd_dir_u ;
-    variable grd_dir_2minus : grd_dir_u ;
+    variable grd_dir_2plus  : grd_dir ;
+    variable grd_dir_2minus : grd_dir ;
   begin
     
     -- On clk rising edge...
