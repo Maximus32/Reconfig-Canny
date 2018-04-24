@@ -22,6 +22,8 @@ entity thresh_block_A is
 end entity ;
 
 architecture ARCH_THRESH_BLK_A_0 of thresh_block_A is
+  signal pass_pipe_h : bit_set ;
+  signal pass_pipe_l : bit_set ;
 begin
   process(clk)
   begin
@@ -32,15 +34,19 @@ begin
         
         -- Check against high threshold
         if (cnv_to_int(magn_arr(i)) > THRESHOLD_HIGH) then
-          pass_high(i) <= '1' ;
-        else pass_high(i) <= '0' ;
+          pass_pipe_h(i) <= '1' ;
+        else pass_pipe_h(i) <= '0' ;
         end if ;
         
         -- Check against low threshold
         if (cnv_to_int(magn_arr(i)) > THRESHOLD_LOW) then
-          pass_low(i) <= '1' ;
-        else pass_low(i) <= '0' ;
+          pass_pipe_l(i) <= '1' ;
+        else pass_pipe_l(i) <= '0' ;
         end if ;
+        
+        -- Pass elements through the pipes
+        pass_low  <= pass_pipe_l ;
+        pass_high <= pass_pipe_h ;
       end loop ;
     end if ;
   end process ;

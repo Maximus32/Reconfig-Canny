@@ -11,20 +11,20 @@ end toplevel_tb;
 architecture TB of toplevel_tb is
   signal clk, rst   : std_logic := '0';
   
-  signal center_pair : grd_pair;
-  signal magn_set    : grd_magn_set;
+  signal dir_arr    : grd_dir_set;
+  signal magn_set   : grd_magn_blk;
   
-  signal thresh_bit  : std_logic;
+  signal thresh_out : bit_set;
 begin
 
   -- Emulator toplevel entity
   U_TOPLEVEL : entity work.toplevel
     port map (
-      clk         => clk,
-      rst         => rst,
-      center_pair => center_pair,
-      magn_set    => magn_set,
-      thresh_bit  => thresh_bit
+      clk        => clk,
+      rst        => rst,
+      dir_arr    => dir_arr,
+      magn_set   => magn_set,
+      thresh_out => thresh_out
     );
   
   -- Clock signal
@@ -32,10 +32,6 @@ begin
   
   process
   begin
-    
-    -- Center pixel magnitude and direction
-    center_pair.magn <= cnv_u(25, WIDTH_GRD_MAGN);
-    center_pair.dir <= GRD_DIR_N;
     
     -- Magnitudes of the surrounding pixels
     magn_set <= (
@@ -45,8 +41,15 @@ begin
       cnv_u(23, WIDTH_GRD_MAGN),
       cnv_u(24, WIDTH_GRD_MAGN),
       cnv_u(25, WIDTH_GRD_MAGN),
-      cnv_u(26, WIDTH_GRD_MAGN),
-      cnv_u(27, WIDTH_GRD_MAGN)
+      cnv_u(31, WIDTH_GRD_MAGN),
+      cnv_u(32, WIDTH_GRD_MAGN),
+      cnv_u(33, WIDTH_GRD_MAGN),
+      cnv_u(29, WIDTH_GRD_MAGN),
+      cnv_u(30, WIDTH_GRD_MAGN),
+      cnv_u(31, WIDTH_GRD_MAGN),
+      cnv_u(32, WIDTH_GRD_MAGN),
+      cnv_u(33, WIDTH_GRD_MAGN),
+      cnv_u(34, WIDTH_GRD_MAGN)
     );
     
     -- System reset
@@ -56,7 +59,9 @@ begin
     
     -- Iterate through all directions
     for i in 0 to COUNT_GRD_DIR-1 loop
-      center_pair.dir <= cnv_u(i, WIDTH_GRD_DIR);
+      dir_arr(0) <= cnv_u(i, WIDTH_GRD_DIR);
+      dir_arr(1) <= cnv_u(i, WIDTH_GRD_DIR);
+      dir_arr(2) <= cnv_u(i, WIDTH_GRD_DIR);
       wait for 40 ns;
     end loop;
     

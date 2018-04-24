@@ -19,7 +19,7 @@ package canny_header is
   constant BLOCK_SIZE     : positive := BLOCK_W * BLOCK_H ;
   
   -- High and low threshold values
-  constant THRESHOLD_HIGH : positive := 50 ;
+  constant THRESHOLD_HIGH : positive := 22 ;
   constant THRESHOLD_LOW  : positive := 10 ;
   
   -- CUSTOM TYPE ---------------------------------------------------------------------------------
