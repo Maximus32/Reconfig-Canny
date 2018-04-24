@@ -14,7 +14,9 @@ package canny_header is
   constant COUNT_GRD_DIR  : positive := 2**WIDTH_GRD_DIR ;
   
   -- Number of pixels in a block
-  constant BLOCK_SIZE     : positive := 9 ;
+  constant BLOCK_W        : positive := 5 ;
+  constant BLOCK_H        : positive := 3 ;
+  constant BLOCK_SIZE     : positive := BLOCK_W * BLOCK_H ;
   
   -- High and low threshold values
   constant THRESHOLD_HIGH : positive := 50 ;
@@ -43,26 +45,32 @@ package canny_header is
   constant GRD_DIR_W  : grd_dir := "110" ;
   constant GRD_DIR_NW : grd_dir := "111" ;
   
-  -- Directional constants for the pixels in a 3x3 block
-  -- Ordered clockwise: identically to the directional constants,
-  -- excepting the "BLOCK_C" which refers to the center pixel
-  constant BLOCK_N  : integer := 0 ;
-  constant BLOCK_NE : integer := 1 ;
-  constant BLOCK_E  : integer := 2 ;
-  constant BLOCK_SE : integer := 3 ;
-  constant BLOCK_S  : integer := 4 ;
-  constant BLOCK_SW : integer := 5 ;
-  constant BLOCK_W  : integer := 6 ;
-  constant BLOCK_NW : integer := 7 ;
-  constant BLOCK_C  : integer := 8 ;
-  
   -- ARRAY TYPES ---------------------------------------------------------------------------------
   
-  -- Set of 9 gradient pairs, ordered clockwise with the center as the last element
+  
+  -- Organization of Pixels in a 3-times unrolled 3x5 block
+  -- Pixels marked with '*'s are "center pixes" which are being operated on
+  --   ___ ___ ___ ___ ___
+  --  |  0|  1|  2|  3|  4|
+  --  |___|___|___|___|___|
+  --  |  5| *6| *7| *8|  9|
+  --  |___|___|___|___|___|
+  --  | 10| 11| 12| 13| 14|
+  --  |___|___|___|___|___|
+  --
+  
+  
+  -- Set of 15 gradient pairs, ordered as shown in the figure
   type grd_pair_block is array (0 to BLOCK_SIZE-1) of grd_pair ;
   
-  -- Set of 8 gradient magnitudes, ordered clockwise
-  type grd_magn_set is array (0 to COUNT_GRD_DIR-1) of grd_magn ;
+  -- Set of 15 gradient magnitudes belonging to a 3x5 pixel block
+  -- Ordered as shown in the figure
+  type grd_magn_blk is array (0 to BLOCK_SIZE-1) of grd_magn ;
+  
+  -- Set of 3 gradient magnitudes and directions of the center pixels
+  -- Ordered from left to right
+  type grd_magn_set is array (0 to BLOCK_W-2-1) of grd_magn ;
+  type grd_dir_set is array (0 to BLOCK_W-2-1) of grd_dir ;
   
   -- Function declarations
   function log2 (num : positive) return integer;

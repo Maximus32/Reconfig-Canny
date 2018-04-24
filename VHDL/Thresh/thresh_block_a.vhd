@@ -14,10 +14,10 @@ use work.canny_header.all ;
 entity thresh_block_A is
   port (
     clk, rst  : in  std_logic ;
-    magn      : in  grd_magn ;
+    magn_arr  : in  grd_magn_set ;
     
-    pass_high : out std_logic ;
-    pass_low  : out std_logic
+    pass_high : out std_logic_vector(BLOCK_W-2-1 downto 0) ;
+    pass_low  : out std_logic_vector(BLOCK_W-2-1 downto 0)
   );
 end entity ;
 
@@ -28,18 +28,20 @@ begin
     
     -- On clk rising edge...
     if (rising_edge(clk)) then
-      
-      -- Check against high threshold
-      if (cnv_to_int(magn) > THRESHOLD_HIGH) then
-        pass_high <= '1' ;
-      else pass_high <= '0' ;
-      end if ;
-      
-      -- Check against low threshold
-      if (cnv_to_int(magn) > THRESHOLD_LOW) then
-        pass_low <= '1' ;
-      else pass_low <= '0' ;
-      end if ;
+      for i in 0 to BLOCK_W-2-1 loop
+        
+        -- Check against high threshold
+        if (cnv_to_int(magn_arr(i)) > THRESHOLD_HIGH) then
+          pass_high(i) <= '1' ;
+        else pass_high(i) <= '0' ;
+        end if ;
+        
+        -- Check against low threshold
+        if (cnv_to_int(magn_arr(i)) > THRESHOLD_LOW) then
+          pass_low(i) <= '1' ;
+        else pass_low(i) <= '0' ;
+        end if ;
+      end loop ;
     end if ;
   end process ;
 end ARCH_THRESH_BLK_A_0 ;

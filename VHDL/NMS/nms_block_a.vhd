@@ -14,33 +14,62 @@ use work.canny_header.all ;
 entity nms_block_A is
   port (
     clk, rst    : in  std_logic ;
-    center_pair : in  grd_pair ;
-    magn_arr    : in  grd_magn_set ;
+    dir_arr     : in  grd_dir_set ;
+    magn_arr    : in  grd_magn_blk ;
     
-    magn_center : out grd_magn ;
-    magn_a      : out grd_magn ;
-    magn_b      : out grd_magn
+    magn_center : out grd_magn_set ;
+    magn_a      : out grd_magn_set ;
+    magn_b      : out grd_magn_set
   );
 end entity ;
 
 architecture ARCH_NMS_BLK_A_0 of nms_block_A is
 begin
   process(clk)
-    variable grd_dir_2plus  : grd_dir ;
-    variable grd_dir_2minus : grd_dir ;
+    variable index_a : natural ;
+    variable index_b : natural ;
   begin
     
     -- On clk rising edge...
     if (rising_edge(clk)) then
-      grd_dir_2plus  := unsigned(center_pair.dir) + 2 ;
-      grd_dir_2minus := unsigned(center_pair.dir) - 2 ;
       
-      -- Select the magnitudes on either side of the center pixel
-      magn_a <= magn_arr(cnv_to_int(grd_dir_2plus)) ;
-      magn_b <= magn_arr(cnv_to_int(grd_dir_2minus)) ;
-      
-      -- Center pixel magnitude
-      magn_center <= center_pair.magn ;
+      -- Calculate indices of magnitudes
+      for i in 0 to BLOCK_W-2-1 loop
+        
+        -- Select the perpendicular index located clockwise of the direction
+        case dir_arr(i) is
+        when GRD_DIR_N  => index_a := 7 ;
+        when GRD_DIR_NE => index_a := 12 ;
+        when GRD_DIR_E  => index_a := 11 ;
+        when GRD_DIR_SE => index_a := 10 ;
+        when GRD_DIR_S  => index_a := 5 ;
+        when GRD_DIR_SW => index_a := 0 ;
+        when GRD_DIR_W  => index_a := 1 ;
+        when GRD_DIR_NW => index_a := 2 ;
+        when others     => index_a := 0 ;
+        end case;
+        
+        -- Select the perpendicular index located counterclockwise of the direction
+        case dir_arr(i) is
+        when GRD_DIR_N  => index_b := 5 ;
+        when GRD_DIR_NE => index_b := 0 ;
+        when GRD_DIR_E  => index_b := 1 ;
+        when GRD_DIR_SE => index_b := 2 ;
+        when GRD_DIR_S  => index_b := 7 ;
+        when GRD_DIR_SW => index_b := 12 ;
+        when GRD_DIR_W  => index_b := 11 ;
+        when GRD_DIR_NW => index_b := 10 ;
+        when others     => index_b := 0 ;
+        end case;
+        
+        -- Add in unrolling offset amount to both indices
+        -- Use indices to get the magnitdues
+        magn_a(i) <= magn_arr(index_a + i) ;
+        magn_b(i) <= magn_arr(index_b + i) ;
+        
+        -- Center pixel magnitude
+        magn_center(i) <= magn_arr(6 + i) ;
+      end loop ;
     end if ;
   end process ;
 end ARCH_NMS_BLK_A_0 ;

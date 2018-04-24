@@ -12,27 +12,28 @@ use work.canny_header.all ;
 --------------------------------------------------------------------------------------------------
 entity toplevel is
   port (
-    clk, rst    : in  std_logic ;
+    clk, rst   : in  std_logic ;
     
-    center_pair : in  grd_pair ;
-    magn_set    : in  grd_magn_set ;
+    dir_arr    : in  grd_dir_set ;
+    magn_set   : in  grd_magn_blk ;
     
-    thresh_bit  : out std_logic
+    thresh_bit : out std_logic_vector(BLOCK_W-2-1 downto 0)
   );
 end entity ;
 
 architecture ARCH_TOPLEVEL_0 of toplevel is
   
   -- Intemediary signals
-  signal magn_center, magn_a, magn_b : grd_magn ;
+  signal magn_center, magn_a, magn_b : grd_magn_set ;
 begin
   
   -- NMS block A
   -- Magnitude extractions
   NMS_BLK_A : entity work.nms_block_a(ARCH_NMS_BLK_A_0)
   port map (clk, rst,
-    center_pair => center_pair,
+    dir_arr     => dir_arr,
     magn_arr    => magn_set,
+    
     magn_center => magn_center,
     magn_a      => magn_a,
     magn_b      => magn_b
