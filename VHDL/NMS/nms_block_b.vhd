@@ -18,7 +18,7 @@ entity nms_block_B is
     magn_a      : in  grd_magn_set ;
     magn_b      : in  grd_magn_set ;
     
-    thresh_bit  : out std_logic_vector(BLOCK_W-2-1 downto 0)
+    thresh_bit  : out bit_set
   );
 end entity ;
 

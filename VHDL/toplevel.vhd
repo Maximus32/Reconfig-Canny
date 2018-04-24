@@ -17,7 +17,7 @@ entity toplevel is
     dir_arr    : in  grd_dir_set ;
     magn_set   : in  grd_magn_blk ;
     
-    thresh_bit : out std_logic_vector(BLOCK_W-2-1 downto 0)
+    thresh_out : out bit_set
   );
 end entity ;
 
@@ -25,6 +25,7 @@ architecture ARCH_TOPLEVEL_0 of toplevel is
   
   -- Intemediary signals
   signal magn_center, magn_a, magn_b : grd_magn_set ;
+  signal thresh_nms, thresh_ths      : bit_set ;
 begin
   
   -- NMS block A
@@ -37,7 +38,7 @@ begin
     magn_center => magn_center,
     magn_a      => magn_a,
     magn_b      => magn_b
-  ) ;
+  );
   
   -- NMS block B
   -- Magnitude comparisons and threshold value
@@ -47,6 +48,27 @@ begin
     magn_a      => magn_a,
     magn_b      => magn_b,
     
-    thresh_bit  => thresh_bit
-  ) ;
+    thresh_bit  => thresh_nms
+  );
+  
+  -- Thresholding block A
+  -- Magnitude comparison against a threshold
+  THRESH_BLK_A : entity work.thresh_block_A(ARCH_THRESH_BLK_A_0)
+  port map (clk, rst,
+    magn_arr  => (magn_set(6), magn_set(7), magn_set(8)),
+    
+    pass_high => thresh_ths,
+    pass_low  => open
+  );
+  
+  -- Thresholding block
+  -- AND of both thresholds
+  THRESH_BLK_B : entity work.thresh_block_B(ARCH_THRESH_BLK_B_0)
+  port map (clk, rst,
+    thresh_nms => thresh_nms,
+    thresh_ths => thresh_ths,
+    
+    thresh_out => thresh_out
+  );
+    
 end ARCH_TOPLEVEL_0 ;

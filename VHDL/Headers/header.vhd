@@ -71,6 +71,7 @@ package canny_header is
   -- Ordered from left to right
   type grd_magn_set is array (0 to BLOCK_W-2-1) of grd_magn ;
   type grd_dir_set is array (0 to BLOCK_W-2-1) of grd_dir ;
+  subtype bit_set is std_logic_vector(0 to BLOCK_W-2-1) ;
   
   -- Function declarations
   function log2 (num : positive) return integer;

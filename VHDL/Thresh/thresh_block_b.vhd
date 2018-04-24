@@ -11,17 +11,17 @@ use work.canny_header.all ;
 -- Compares the input gradient magnitude to the high and low thresholds, outputing a binary value
 -- for each
 --------------------------------------------------------------------------------------------------
-entity thresh_block_A is
+entity thresh_block_B is
   port (
-    clk, rst  : in  std_logic ;
-    magn_arr  : in  grd_magn_set ;
+    clk, rst   : in  std_logic ;
+    thresh_nms : in  bit_set ;
+    thresh_ths : in  bit_set ;
     
-    pass_high : out bit_set ;
-    pass_low  : out bit_set
+    thresh_out : out bit_set
   );
 end entity ;
 
-architecture ARCH_THRESH_BLK_A_0 of thresh_block_A is
+architecture ARCH_THRESH_BLK_B_0 of thresh_block_B is
 begin
   process(clk)
   begin
@@ -29,19 +29,8 @@ begin
     -- On clk rising edge...
     if (rising_edge(clk)) then
       for i in 0 to BLOCK_W-2-1 loop
-        
-        -- Check against high threshold
-        if (cnv_to_int(magn_arr(i)) > THRESHOLD_HIGH) then
-          pass_high(i) <= '1' ;
-        else pass_high(i) <= '0' ;
-        end if ;
-        
-        -- Check against low threshold
-        if (cnv_to_int(magn_arr(i)) > THRESHOLD_LOW) then
-          pass_low(i) <= '1' ;
-        else pass_low(i) <= '0' ;
-        end if ;
+        thresh_out(i) <= thresh_nms(i) and thresh_ths(i) ;
       end loop ;
     end if ;
   end process ;
-end ARCH_THRESH_BLK_A_0 ;
+end ARCH_THRESH_BLK_B_0 ;
