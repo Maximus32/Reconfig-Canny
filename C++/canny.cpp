@@ -33,20 +33,41 @@ canny::canny(String filename)
 	vector<vector<double>> filter = createFilter(3, 3, 1);
 
     //Print filter
-    for (int i = 0; i<filter.size(); i++) 
+   /* for (int i = 0; i<filter.size(); i++) 
     {
         for (int j = 0; j<filter[i].size(); j++) 
         {
             cout << filter[i][j] << " ";
         }
-    }
+    }*/
 
     cout << "\n#rows = " << img.rows << " #cols = " << img.cols << endl; //get image size from these values
 
     //grayscaled = Mat(img.toGrayScale()); //Grayscale the image
     cvtColor(img, grayscaled, CV_BGR2GRAY);
     gFiltered = Mat(useFilter(grayscaled, filter)); //Gaussian Filter
+    
+
+    //cout << "\nSize of gFiltered is: " << gFiltered.rows << " rows, and cols = " << gFiltered.cols << endl;
+
+    //cout << "\nPixel (2,2) Gaussian filter value is: " << (double)(gFiltered.at<uchar>(2,2)) << endl;
+
+    //****Dave: using sFiltered for magnitudes and angles for the angles
     sFiltered = Mat(sobel()); //Sobel Filter
+
+
+    for(int i = 0; i < sFiltered.rows -1; i++){
+       for(int j=0; j < sFiltered.cols -1; j++){
+           cout << "(" << i << ", " << j << ") = " << sFiltered.at<uint16_t>(i,j) << endl;
+        }
+   }
+
+    for(int i = 0; i < sFiltered.rows -1; i++){
+       for(int j=0; j < sFiltered.cols -1; j++){
+           cout << "(" << i << ", " << j << ") = " << (int16_t)angles.at<float>(i,j) << endl;
+       }
+   }
+
 
     non = Mat(nonMaxSupp()); //Non-Maxima Suppression
     thres = Mat(threshold(non, 20, 40)); //Double Threshold and Finalize
