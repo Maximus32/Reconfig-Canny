@@ -19,7 +19,7 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    cv::String filePath = "index.jpeg"; //Filepath of input image
+    cv::String filePath = "index2.jpeg"; //Filepath of input image
     
 
     canny cny(filePath);

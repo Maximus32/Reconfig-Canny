@@ -7,12 +7,15 @@
 //
 
 #include <iostream>
+#include <fstream>
+#include <string>
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <vector>
 #include "canny.h"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
+#include "Timer.h"
 
 using namespace std;
 using namespace cv;
@@ -30,61 +33,64 @@ canny::canny(String filename)
 	else
 	{
 
-	vector<vector<double>> filter = createFilter(3, 3, 1);
+	Timer hwInputGen, swTime; 
 
-    //Print filter
-   /* for (int i = 0; i<filter.size(); i++) 
-    {
-        for (int j = 0; j<filter[i].size(); j++) 
-        {
-            cout << filter[i][j] << " ";
-        }
-    }*/
+	hwInputGen.start();
+	swTime.start();
+
+	vector<vector<double>> filter = createFilter(3, 3, 1);
 
     cout << "\n#rows = " << img.rows << " #cols = " << img.cols << endl; //get image size from these values
 
-    //grayscaled = Mat(img.toGrayScale()); //Grayscale the image
     cvtColor(img, grayscaled, CV_BGR2GRAY);
     gFiltered = Mat(useFilter(grayscaled, filter)); //Gaussian Filter
-    
 
-    //cout << "\nSize of gFiltered is: " << gFiltered.rows << " rows, and cols = " << gFiltered.cols << endl;
+	gradient_angles_4hardware(); //this gets the gradient angles that'll be sent to the hardware
 
-    //cout << "\nPixel (2,2) Gaussian filter value is: " << (double)(gFiltered.at<uchar>(2,2)) << endl;
-
+    hwInputGen.stop();
     //****Dave: using sFiltered for magnitudes and angles for the angles
     sFiltered = Mat(sobel()); //Sobel Filter
 
-
-    for(int i = 0; i < sFiltered.rows -1; i++){
-       for(int j=0; j < sFiltered.cols -1; j++){
-           cout << "(" << i << ", " << j << ") = " << sFiltered.at<uint16_t>(i,j) << endl;
-        }
-   }
-
-    for(int i = 0; i < sFiltered.rows -1; i++){
-       for(int j=0; j < sFiltered.cols -1; j++){
-           cout << "(" << i << ", " << j << ") = " << (int16_t)angles.at<float>(i,j) << endl;
-       }
-   }
-
+    //hwInputGen.stop();
 
     non = Mat(nonMaxSupp()); //Non-Maxima Suppression
     thres = Mat(threshold(non, 20, 40)); //Double Threshold and Finalize
 	
+    swTime.stop();
+
+    cout << "\nHw input gen time: " << hwInputGen.elapsedTime() << ", and swTime is: " << swTime.elapsedTime() << endl;
+
 	namedWindow("Original");  
-    namedWindow("GrayScaled");
+    //namedWindow("GrayScaled");
     namedWindow("Gaussian Blur");
     namedWindow("Sobel Filtered");
     namedWindow("Non-Maxima Supp.");
     namedWindow("Final");
 
     imshow("Original", img);                  
-    imshow("GrayScaled", grayscaled);
+    //imshow("GrayScaled", grayscaled);
     imshow("Gaussian Blur", gFiltered);
     imshow("Sobel Filtered", sFiltered);
     imshow("Non-Maxima Supp.", non);
     imshow("Final", thres);
+
+
+    ofstream outputFile;
+
+
+    outputFile.open("test_csv.csv"); //open the csv file
+
+    
+    outputFile << img.rows << "," << img.cols << "," << hwInputGen.elapsedTime() << endl;
+
+    for(int i = 0; i < sFiltered.rows; i++){
+    	for(int j = 0; j < sFiltered.cols; j++){
+    		outputFile << sFiltered.at<uint16_t>(i,j) << "," << (int16_t)angles.at<float>(i,j) << endl;
+    	}
+    	//outputFile << endl;
+    }
+
+    outputFile.close();
 
 
     cv::waitKey(0);
@@ -357,4 +363,61 @@ Mat canny::threshold(Mat imgin,int low, int high)
         }
     }
     return EdgeMat;
+}
+
+
+void canny::gradient_angles_4hardware(){
+
+
+	//**********************************************************************************************************************
+    
+
+    //Sobel X Filter
+    double x1[] = {-1.0, 0, 1.0};
+    double x2[] = {-2.0, 0, 2.0};
+    double x3[] = {-1.0, 0, 1.0};
+
+    vector<vector<double>> xFilter(3);
+    xFilter[0].assign(x1, x1+3);
+    xFilter[1].assign(x2, x2+3);
+    xFilter[2].assign(x3, x3+3);
+    
+    //Sobel Y Filter
+    double y1[] = {1.0, 2.0, 1.0};
+    double y2[] = {0, 0, 0};
+    double y3[] = {-1.0, -2.0, -1.0};
+    
+    vector<vector<double>> yFilter(3);
+    yFilter[0].assign(y1, y1+3);
+    yFilter[1].assign(y2, y2+3);
+    yFilter[2].assign(y3, y3+3);
+
+    int size = (int)xFilter.size()/2;
+
+    angles_dave = Mat(gFiltered.rows - 2*size, gFiltered.cols - 2*size, CV_32FC1); //AngleMap
+
+    for (int i = size; i < gFiltered.rows - size; i++)
+	{
+		for (int j = size; j < gFiltered.cols - size; j++)
+		{
+			double sumx = 0;
+            double sumy = 0;
+            
+			for (int x = 0; x < xFilter.size(); x++)
+				for (int y = 0; y < xFilter.size(); y++)
+				{
+                    sumx += xFilter[x][y] * (double)(gFiltered.at<uchar>(i + x - size, j + y - size)); //Sobel_X Filter Value
+                    sumy += yFilter[x][y] * (double)(gFiltered.at<uchar>(i + x - size, j + y - size)); //Sobel_Y Filter Value
+				}
+
+            if(sumx==0) //Arctan Fix
+                angles_dave.at<float>(i-size, j-size) = 90;
+            else
+                angles_dave.at<float>(i-size, j-size) = atan(sumy/sumx);
+		}
+	}
+
+	
+    //**********************************************************************************************************************
+
 }

@@ -22,6 +22,7 @@ private:
     Mat gFiltered; // Gradient
     Mat sFiltered; //Sobel Filtered
     Mat angles; //Angle Map
+    Mat angles_dave; //******************delete later, using for debugging
     Mat non; // Non-maxima supp.
     Mat thres; //Double threshold and final
 public:
@@ -33,6 +34,7 @@ public:
     Mat sobel(); //Sobel filtering
     Mat nonMaxSupp(); //Non-maxima supp.
     Mat threshold(Mat, int, int); //Double threshold and finalize picture
+    void gradient_angles_4hardware();
 };
 
 #endif
