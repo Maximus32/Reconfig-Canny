@@ -16,7 +16,7 @@
 #define MEM_INT_ADDR_SPACE (1 << 20)
 
 // total size in words of memory-map address psace
-#define MMAP_ADDR_WIDTH 18
+#define MMAP_ADDR_WIDTH 21
 
 // bit width of each memory-map word
 #define MMAP_DATA_WIDTH 32
