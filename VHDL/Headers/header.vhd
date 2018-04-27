@@ -6,7 +6,12 @@ use ieee.numeric_std.all ;
 package canny_header is
 
   -- CONSTANTS -----------------------------------------------------------------------------------
-
+  
+  -- Input image dimensions
+  -- Minus 2 for the edge loss in the Canny algorithm
+  constant IMG_WIDTH  : positive := 1920-2;
+  constant IMG_HEIGHT : positive := 1080-2;
+  
   -- Widths of magnitude and direction vector types
   constant WIDTH_GRD_MAGN : positive := 8 ;
   constant WIDTH_GRD_DIR  : positive := 3 ;
@@ -20,7 +25,10 @@ package canny_header is
   constant BLOCK_W        : positive := 5 ;
   constant BLOCK_H        : positive := 3 ;
   constant BLOCK_SIZE     : positive := BLOCK_W * BLOCK_H ;
-
+  
+  -- Number of times unrolled
+  constant UNROLL_CNT     : positive := 3 ;
+  
   -- High and low threshold values
   constant THRESHOLD_HIGH : positive := 22 ;
   constant THRESHOLD_LOW  : positive := 10 ;
@@ -50,6 +58,9 @@ package canny_header is
   constant GRD_DIR_SW : grd_dir := "101" ;
   constant GRD_DIR_W  : grd_dir := "110" ;
   constant GRD_DIR_NW : grd_dir := "111" ;
+  
+  -- Zero'ed out gradient pair
+  constant GRD_PAIR_ZERO : grd_pair := (magn => (others => '0'), dir => GRD_DIR_N) ;
 
   -- ARRAY TYPES ---------------------------------------------------------------------------------
 
@@ -64,24 +75,24 @@ package canny_header is
   --  | 10| 11| 12| 13| 14|
   --  |___|___|___|___|___|
   --
-
-
+  
+  
   -- Set of 15 gradient pairs, ordered as shown in the figure
-  type grd_pair_block is array (BLOCK_SIZE-1 downto 0) of grd_pair ;
+  type grd_pair_blk is array (0 to BLOCK_SIZE-1) of grd_pair ;
   
   -- Set of 3 gradient pairs, ordered from left to right
-  type grd_pair_set is array (BLOCK_SIZE_W-2-1 downto 0) of grd_pair ;
-
+  type grd_pair_set is array (UNROLL_CNT-1 downto 0) of grd_pair ;
+  
   -- Set of 15 gradient magnitudes belonging to a 3x5 pixel block
   -- Ordered as shown in the figure
   type grd_magn_blk is array (0 to BLOCK_SIZE-1) of grd_magn ;
-
+  
   -- Set of 3 gradient magnitudes and directions of the center pixels
   -- Ordered from left to right
-  type grd_magn_set is array (0 to BLOCK_W-2-1) of grd_magn ;
-  type grd_dir_set is array (0 to BLOCK_W-2-1) of grd_dir ;
-  subtype bit_set is std_logic_vector(0 to BLOCK_W-2-1) ;
-
+  type grd_magn_set is array (0 to UNROLL_CNT-1) of grd_magn ;
+  type grd_dir_set is array (0 to UNROLL_CNT-1) of grd_dir ;
+  subtype bit_set is std_logic_vector(0 to UNROLL_CNT-1) ;
+  
   -- Function declarations
   function log2 (num : positive) return integer;
   function cnv (num : integer; size : positive) return std_logic_vector;
@@ -91,7 +102,7 @@ package canny_header is
 end canny_header ;
 
 package body canny_header is
-
+  
   -- Function "log2"
   -- Returns the ceiling-ed base-2 logarithm of 'num'
   function log2 (num : positive) return integer is
