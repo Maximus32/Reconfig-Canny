@@ -10,7 +10,10 @@ package canny_header is
   -- Widths of magnitude and direction vector types
   constant WIDTH_GRD_MAGN : positive := 8 ;
   constant WIDTH_GRD_DIR  : positive := 3 ;
-
+  
+  constant WIDTH_RAW_MAGN : positive := 16 ;
+  constant WIDTH_RAW_DIR  : positive := 16 ;
+  
   constant COUNT_GRD_DIR  : positive := 2**WIDTH_GRD_DIR ;
 
   -- Number of pixels in a block
@@ -26,6 +29,9 @@ package canny_header is
   subtype grd_magn   is unsigned(WIDTH_GRD_MAGN-1 downto 0) ;
   subtype grd_dir    is unsigned(WIDTH_GRD_DIR-1 downto 0) ;
 
+  subtype raw_magn   is unsigned(WIDTH_RAW_MAGN-1 downto 0) ;
+  subtype raw_dir    is unsigned(WIDTH_RAW_DIR-1 downto 0) ;
+  
   -- Magnitdue/direction pair record type
   type grd_pair is record
     magn : grd_magn ;
@@ -61,7 +67,10 @@ package canny_header is
 
 
   -- Set of 15 gradient pairs, ordered as shown in the figure
-  type grd_pair_block is array (0 to BLOCK_SIZE-1) of grd_pair ;
+  type grd_pair_block is array (BLOCK_SIZE-1 downto 0) of grd_pair ;
+  
+  -- Set of 3 gradient pairs, ordered from left to right
+  type grd_pair_set is array (BLOCK_SIZE_W-2-1 downto 0) of grd_pair ;
 
   -- Set of 15 gradient magnitudes belonging to a 3x5 pixel block
   -- Ordered as shown in the figure
@@ -72,8 +81,6 @@ package canny_header is
   type grd_magn_set is array (0 to BLOCK_W-2-1) of grd_magn ;
   type grd_dir_set is array (0 to BLOCK_W-2-1) of grd_dir ;
   subtype bit_set is std_logic_vector(0 to BLOCK_W-2-1) ;
-
-  subtype grd_pair_arr is array (BLOCK_SIZE-1 downto 0) of grd_pair ;
 
   -- Function declarations
   function log2 (num : positive) return integer;
