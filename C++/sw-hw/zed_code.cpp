@@ -28,6 +28,7 @@ int main(int argc, char* argv[]){
 
 	if(argc != 2){
 		cerr << "Usage: " << argv[0] << " bitfile" << endl;
+		return -1;
 	}
 
 	ifstream inputFile;
@@ -38,20 +39,6 @@ int main(int argc, char* argv[]){
 		cout << "\nError opening csv file!" << endl;
 		return -1;
 	}
-
-	//debugging code
-	/*
-	string temp_string;
-	getline(inputFile, temp_string, ',');
-	cout << "\n" << temp_string << endl;
-
-	double temp_dub = atof(temp_string.c_str());
-	cout << temp_dub << endl;
-
-	string::size_type sz;
-	int16_t temp_int = (int16_t)stoi(temp_string, &sz, 10);
-	cout << temp_int << endl;
-	*/
 
 	string::size_type sz;
 	string in_string, in_string1, in_string2;
@@ -152,6 +139,24 @@ int main(int argc, char* argv[]){
 
 	double transferTime = writeTime.elapsedTime() + readTime.elapsedTime();
 	double hwWithInputGenTime = waitTime.elapsedTime() + hw_input_gen_time;
+
+
+	ofstream outputFile;
+
+
+    outputFile.open("hw_outputs.csv"); //open the csv file
+
+    
+    outputFile << num_rows << "," << num_cols << "," << "," << transferTime << "," << hwWithInputGenTime << endl;
+
+    for(int i = 0; i < size; i++){
+    		
+    		outputFile << hwOutput[i] << "\n" << endl;
+    		 	
+    }
+
+    outputFile.close();
+
 
 	delete hwOutput;
 	delete hw_inputs;

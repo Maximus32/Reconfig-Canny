@@ -57,14 +57,23 @@ canny::canny(String filename)
     cout << "\nsw time: " << swTime.elapsedTime() << endl;
 
 	namedWindow("Original");  
-    namedWindow("Non-Maxima Supp.");
-    //namedWindow("Final");
+    namedWindow("Software Output");
 
     imshow("Original", img);                  
-    imshow("Non-Maxima Supp.", non);
-    //imshow("Final", thres);
+    imshow("Software Output", non);
 
-    cv::waitKey(0);
+
+    //here we read in the output values from the FPGA, then print the image it produced
+    ifstream inputFile;
+    inputFile.open("hw_outputs.csv");
+
+    if(!inputFile.is_open()){
+        cout << "\nError opening csv file!" << endl;
+        return -1;
+    }
+
+
+    cv::waitKey(0); //this line of code keeps the images shown
 	}
 }
 
