@@ -55,7 +55,7 @@ canny::canny(String filename)
     ofstream outputFile;
 
 
-    outputFile.open("test_csv.csv"); //open the csv file
+    outputFile.open("hw_inputs.csv"); //open the csv file
 
     
     outputFile << img.rows << "," << img.cols << "," << hwInputGen.elapsedTime() << endl;

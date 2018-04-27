@@ -362,7 +362,8 @@ Mat canny::readFPGA(){
 
             getline(inputFile, in_string1, '\n');
             returnMat.at<uchar>(i,j) = (uchar)(stoi(in_string1, &sz, 10));
-
+            //int temp = stoi(in_string1, &sz, 10);
+            //returnMat.at<uchar>(i,j) = (unsigned char)temp & 0xFF;
         }
         i++;
         if(i == num_rows){
@@ -372,7 +373,7 @@ Mat canny::readFPGA(){
 
     cout << "\nThe FPGA took " << transferTime << " seconds in transfer time, and " << hwTime << " seconds to do the canny algorithm" << endl;
 
-
+    cout << "\n\nThe size of the FPGA output is: " << returnMat.rows << " x " << returnMat.cols << endl;
     return returnMat;
 
 }

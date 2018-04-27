@@ -43,7 +43,7 @@ int main(int argc, char* argv[]){
 	}
 
 	ifstream inputFile;
-	inputFile.open("test_csv.csv");
+	inputFile.open("hw_inputs.csv");
 
 
 	if(!inputFile.is_open()){
