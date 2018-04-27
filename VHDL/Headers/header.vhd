@@ -11,6 +11,9 @@ package canny_header is
   constant WIDTH_GRD_MAGN : positive := 8 ;
   constant WIDTH_GRD_DIR  : positive := 3 ;
   
+  constant WIDTH_RAW_MAGN : positive := 16 ;
+  constant WIDTH_RAW_DIR  : positive := 16 ;
+  
   constant COUNT_GRD_DIR  : positive := 2**WIDTH_GRD_DIR ;
   
   -- Number of pixels in a block
@@ -25,6 +28,9 @@ package canny_header is
   -- CUSTOM TYPE ---------------------------------------------------------------------------------
   subtype grd_magn   is unsigned(WIDTH_GRD_MAGN-1 downto 0) ;
   subtype grd_dir    is unsigned(WIDTH_GRD_DIR-1 downto 0) ;
+  
+  subtype raw_magn   is unsigned(WIDTH_RAW_MAGN-1 downto 0) ;
+  subtype raw_dir    is unsigned(WIDTH_RAW_DIR-1 downto 0) ;
   
   -- Magnitdue/direction pair record type
   type grd_pair is record
