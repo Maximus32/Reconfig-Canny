@@ -22,12 +22,12 @@ package canny_header is
   constant COUNT_GRD_DIR  : positive := 2**WIDTH_GRD_DIR ;
 
   -- Number of pixels in a block
-  constant BLOCK_W        : positive := 5 ;
+  constant BLOCK_W        : positive := 3 ;
   constant BLOCK_H        : positive := 3 ;
   constant BLOCK_SIZE     : positive := BLOCK_W * BLOCK_H ;
   
   -- Number of times unrolled
-  constant UNROLL_CNT     : positive := 3 ;
+  constant UNROLL_CNT     : positive := 1 ;
   
   -- High and low threshold values
   constant THRESHOLD_HIGH : positive := 22 ;
@@ -67,23 +67,22 @@ package canny_header is
 
   -- Organization of Pixels in a 3-times unrolled 3x5 block
   -- Pixels marked with '*'s are "center pixes" which are being operated on
-  --   ___ ___ ___ ___ ___
-  --  |  0|  1|  2|  3|  4|
-  --  |___|___|___|___|___|
-  --  |  5| *6| *7| *8|  9|
-  --  |___|___|___|___|___|
-  --  | 10| 11| 12| 13| 14|
-  --  |___|___|___|___|___|
+  --   ___ ___ ___ 
+  --  |  0|  1|  2|
+  --  |___|___|___|
+  --  |  3| *4|  5|
+  --  |___|___|___|
+  --  |  6|  7|  8|
+  --  |___|___|___|
   --
   
-  
-  -- Set of 15 gradient pairs, ordered as shown in the figure
+  -- Set of 9 gradient pairs, ordered as shown in the figure
   type grd_pair_blk is array (0 to BLOCK_SIZE-1) of grd_pair ;
   
   -- Set of 3 gradient pairs, ordered from left to right
-  type grd_pair_set is array (UNROLL_CNT-1 downto 0) of grd_pair ;
+  type grd_pair_set is array (BLOCK_W-1 downto 0) of grd_pair ;
   
-  -- Set of 15 gradient magnitudes belonging to a 3x5 pixel block
+  -- Set of 9 gradient magnitudes belonging to a 3x3 pixel block
   -- Ordered as shown in the figure
   type grd_magn_blk is array (0 to BLOCK_SIZE-1) of grd_magn ;
   

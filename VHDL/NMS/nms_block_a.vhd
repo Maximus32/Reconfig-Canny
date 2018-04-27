@@ -38,11 +38,11 @@ begin
         
         -- Select the perpendicular index located clockwise of the direction
         case dir_arr(i) is
-        when GRD_DIR_N  => index_a := 7 ;
-        when GRD_DIR_NE => index_a := 12 ;
-        when GRD_DIR_E  => index_a := 11 ;
-        when GRD_DIR_SE => index_a := 10 ;
-        when GRD_DIR_S  => index_a := 5 ;
+        when GRD_DIR_N  => index_a := 5 ;
+        when GRD_DIR_NE => index_a := 8 ;
+        when GRD_DIR_E  => index_a := 7 ;
+        when GRD_DIR_SE => index_a := 6 ;
+        when GRD_DIR_S  => index_a := 3 ;
         when GRD_DIR_SW => index_a := 0 ;
         when GRD_DIR_W  => index_a := 1 ;
         when GRD_DIR_NW => index_a := 2 ;
@@ -51,14 +51,14 @@ begin
         
         -- Select the perpendicular index located counterclockwise of the direction
         case dir_arr(i) is
-        when GRD_DIR_N  => index_b := 5 ;
-        when GRD_DIR_NE => index_b := 0 ;
-        when GRD_DIR_E  => index_b := 1 ;
-        when GRD_DIR_SE => index_b := 2 ;
-        when GRD_DIR_S  => index_b := 7 ;
-        when GRD_DIR_SW => index_b := 12 ;
-        when GRD_DIR_W  => index_b := 11 ;
-        when GRD_DIR_NW => index_b := 10 ;
+        when GRD_DIR_N  => index_b := 3 ;
+        when GRD_DIR_NE => index_b := 6 ;
+        when GRD_DIR_E  => index_b := 7 ;
+        when GRD_DIR_SE => index_b := 8 ;
+        when GRD_DIR_S  => index_b := 5 ;
+        when GRD_DIR_SW => index_b := 2 ;
+        when GRD_DIR_W  => index_b := 1 ;
+        when GRD_DIR_NW => index_b := 0 ;
         when others     => index_b := 0 ;
         end case;
         
@@ -68,7 +68,7 @@ begin
         magn_b(i) <= magn_arr(index_b + i) ;
         
         -- Center pixel magnitude
-        magn_center(i) <= magn_arr(6 + i) ;
+        magn_center(i) <= magn_arr(4 + i) ;
       end loop ;
     end if ;
   end process ;

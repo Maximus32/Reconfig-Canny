@@ -6,26 +6,28 @@ use ieee.numeric_std.all ;
 use work.canny_header.all ;
 
 --------------------------------------------------------------------------------------------------
--- TOPLEVEL
+-- DATAPATH
 --================================================================================================  
--- Structural toplevel of the Canny edge detector circuit
+-- Structural toplevel of the Canny edge detector datapath
 --------------------------------------------------------------------------------------------------
-entity toplevel is
+entity datapath is
   port (
     clk, rst   : in  std_logic ;
     
     dir_arr    : in  grd_dir_set ;
-    magn_set   : in  grd_magn_blk ;
+    magn_blk   : in  grd_magn_blk ;
     
     thresh_out : out bit_set
   );
 end entity ;
 
-architecture ARCH_TOPLEVEL_0 of toplevel is
+architecture ARCH_TOPLEVEL_0 of datapath is
   
   -- Intemediary signals
   signal magn_center, magn_a, magn_b : grd_magn_set ;
   signal thresh_nms, thresh_ths      : bit_set ;
+  
+  signal magn_set                    : grd_magn_set ;
 begin
   
   -- NMS block A
@@ -33,7 +35,7 @@ begin
   NMS_BLK_A : entity work.nms_block_a(ARCH_NMS_BLK_A_0)
   port map (clk, rst,
     dir_arr     => dir_arr,
-    magn_arr    => magn_set,
+    magn_arr    => magn_blk,
     
     magn_center => magn_center,
     magn_a      => magn_a,
@@ -55,7 +57,7 @@ begin
   -- Magnitude comparison against a threshold
   THRESH_BLK_A : entity work.thresh_block_A(ARCH_THRESH_BLK_A_0)
   port map (clk, rst,
-    magn_arr  => (magn_set(6), magn_set(7), magn_set(8)),
+    magn_set(0)  => magn_blk(4),
     
     pass_high => thresh_ths,
     pass_low  => open

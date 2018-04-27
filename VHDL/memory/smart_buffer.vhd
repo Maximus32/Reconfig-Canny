@@ -24,7 +24,7 @@ end smart_buffer;
 
 architecture ARCH_SMART_BUFF_0 of smart_buffer is
   
-  -- A set of registers holding the value of the current 5x3 block
+  -- A set of registers holding the value of the current 3x3 block
   signal pipe_blk : grd_pair_blk;
 begin
   process(clk, rst)
@@ -40,20 +40,20 @@ begin
     elsif (rising_edge(clk)) then
       
       -- For each row...
-      for row in 0 to UNROLL_CNT-1 loop
+      for row in 0 to BLOCK_H-1 loop
         
         -- Left and right row coordinates
-        blk_l := 5*row;
-        blk_r := 5*(row+1)-1;
+        blk_l := BLOCK_W*row;
+        blk_r := BLOCK_W*(row+1)-1;
         
-        -- Shift out all 15 gradient pairs to the datapath
+        -- Shift out all 9 gradient pairs to the datapath
         grd_arr_out <= pipe_blk;
         
         -- Shift contents down the pipe block
         pipe_blk(blk_l+1 to blk_r) <= pipe_blk(blk_l to blk_r-1);
         
         -- Shift in next 3 gradient pairs from memory
-		  pipe_blk(blk_l) <= grd_set_in(row);
+        pipe_blk(blk_l) <= grd_set_in(row);
       end loop;
     end if;
   end process;
