@@ -33,8 +33,8 @@ architecture default of user_app is
 
     signal mem_in_wr_data       : std_logic_vector(C_MEM_IN_WIDTH-1 downto 0);
     signal mem_in_wr_addr       : std_logic_vector(C_MEM_ADDR_WIDTH-1 downto 0);
-    signal mem_in_wr_addr2      : std_logic_vector(C_MEM_ADDR_WIDTH-1 downto 0)
-    signal mem_in_wr_addr3      : std_logic_vector(C_MEM_ADDR_WIDTH-1 downto 0)
+    signal mem_in_wr_addr2      : std_logic_vector(C_MEM_ADDR_WIDTH-1 downto 0);
+    signal mem_in_wr_addr3      : std_logic_vector(C_MEM_ADDR_WIDTH-1 downto 0);
     signal mem_in_rd_data1      : std_logic_vector(C_MEM_IN_WIDTH-1 downto 0);
     signal mem_in_rd_data2      : std_logic_vector(C_MEM_IN_WIDTH-1 downto 0);
     signal mem_in_rd_data3      : std_logic_vector(C_MEM_IN_WIDTH-1 downto 0);
