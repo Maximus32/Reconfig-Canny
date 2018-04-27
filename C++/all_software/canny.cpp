@@ -54,7 +54,7 @@ canny::canny(String filename)
 
     swTime.stop();
 
-    cout << "\nsw time: " << swTime.elapsedTime() << endl;
+    cout << "\nsw time: " << swTime.elapsedTime() << " seconds to complete canny algorithm" << endl;
 
 	namedWindow("Original");  
     namedWindow("Software Output");
@@ -63,15 +63,10 @@ canny::canny(String filename)
     imshow("Software Output", non);
 
 
-    //here we read in the output values from the FPGA, then print the image it produced
-    ifstream inputFile;
-    inputFile.open("hw_outputs.csv");
+    FPGA_impl = readFPGA(); //get the FPGA outputs into Mat format
 
-    if(!inputFile.is_open()){
-        cout << "\nError opening csv file!" << endl;
-        return -1;
-    }
-
+    namedWindow("FPGA Output");
+    imshow("FPGA Output", FPGA_impl);
 
     cv::waitKey(0); //this line of code keeps the images shown
 	}
@@ -329,3 +324,55 @@ Mat canny::threshold(Mat imgin,int low, int high)
     return EdgeMat;
 }
 
+Mat canny::readFPGA(){
+
+    //here we read in the output values from the FPGA, then print the image it produced
+    ifstream inputFile;
+    inputFile.open("hw_outputs.csv");
+
+    if(!inputFile.is_open()){
+        cout << "\nError opening csv file!" << endl;
+    }
+
+    string::size_type sz;
+    string in_string, in_string1;
+    
+    //first three values in csv file are rows, cols, transferTime, and hwExecutionTime
+    getline(inputFile, in_string, ','); //read in the number of rows value (max = 1080)
+    unsigned num_rows = unsigned(stoi(in_string, &sz, 10));
+
+    getline(inputFile, in_string, ','); //read in the number of cols value (max = 1920)
+    unsigned num_cols = unsigned(stoi(in_string, &sz, 10)); //convert string to int
+
+    getline(inputFile, in_string, ','); //read in the time it took to generate the hw inputs
+    double transferTime = atof(in_string.c_str()); //convert string to double
+
+    getline(inputFile, in_string, '\n'); //read in the time it took to generate the hw inputs
+    double hwTime = atof(in_string.c_str()); //convert string to double
+
+    Mat returnMat = Mat(num_rows, num_cols, CV_8UC1); //r x c in size and contains 8 bit values (0-255)
+
+    cout << num_rows << " " << num_cols << endl;
+
+    int i = 0;
+
+    while(inputFile.is_open()){
+
+        for(int j = 0; j < num_cols; j++){
+
+            getline(inputFile, in_string1, '\n');
+            returnMat.at<uchar>(i,j) = (uchar)(stoi(in_string1, &sz, 10));
+
+        }
+        i++;
+        if(i == num_rows){
+            inputFile.close();
+        }
+    }
+
+    cout << "\nThe FPGA took " << transferTime << " seconds in transfer time, and " << hwTime << " seconds to do the canny algorithm" << endl;
+
+
+    return returnMat;
+
+}

@@ -1,3 +1,14 @@
+//David Watts
+//Reconfig final project
+
+//This code is meant to run on the Arm processors inside the ZED board.
+//Our final project needs OpenCV do to image processing to generate FPGA
+//inputs. To generate these inputs, we run OpenCV code on our personal computer
+//to generate a csv file which contains the inputs needed for the FPGA. This code
+//reads those inputs in, executes the canny algorithm on the FPGA, then prints the 
+//results to another csv file which will be used to print the image back on our personal
+//computer.
+
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,8 +89,8 @@ int main(int argc, char* argv[]){
 	}
 
 	//debugging
-	cout << "\nCount was: " << my_count << endl;
-	cout << hw_inputs[1] << endl;
+	//cout << "\nCount was: " << my_count << endl;
+	//cout << hw_inputs[1] << endl;
 
 	inputFile.close();
 
@@ -146,10 +157,11 @@ int main(int argc, char* argv[]){
 
     outputFile.open("hw_outputs.csv"); //open the csv file
 
+    unsigned outputLength = (num_rows - 2) * (num_cols - 2);
     
-    outputFile << num_rows << "," << num_cols << "," << "," << transferTime << "," << hwWithInputGenTime << endl;
+    outputFile << num_rows-2 << "," << num_cols-2 << "," << transferTime << "," << hwWithInputGenTime << endl;
 
-    for(int i = 0; i < size; i++){
+    for(int i = 0; i < outputLength; i++){
     		
     		outputFile << hwOutput[i] << "\n" << endl;
     		 	
