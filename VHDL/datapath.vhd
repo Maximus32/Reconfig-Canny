@@ -21,7 +21,7 @@ entity datapath is
   );
 end entity ;
 
-architecture ARCH_TOPLEVEL_0 of datapath is
+architecture ARCH_DATAPATH_0 of datapath is
   
   -- Intemediary signals
   signal magn_center, magn_a, magn_b : grd_magn_set ;
@@ -73,4 +73,4 @@ begin
     thresh_out => thresh_out
   );
     
-end ARCH_TOPLEVEL_0 ;
+end ARCH_DATAPATH_0 ;

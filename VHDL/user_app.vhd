@@ -7,6 +7,7 @@ use ieee.numeric_std.all;
 
 use work.config_pkg.all;
 use work.user_pkg.all;
+use work.canny_header.all;
 
 entity user_app is
     port (
@@ -57,6 +58,15 @@ architecture default of user_app is
     signal wr_en_2           : std_logic;
     signal wr_en_3           : std_logic;
     signal size_signal       : std_logic_vector(C_MEM_ADDR_WIDTH downto 0);
+  
+    -- Canny magnitdues and directionals
+    signal grd_set    : grd_pair_set;
+    
+    signal grd_blk    : grd_pair_blk;
+    signal magn_blk   : grd_magn_blk;
+    signal dir_set    : grd_dir_set;
+    
+    signal thresh_out : bit_set;
 
 begin
 
@@ -106,8 +116,17 @@ begin
             waddr => mem_in_wr_addr,
             wdata => mem_in_wr_data,
             raddr => mem_in_rd_addr,  -- TODO: connect to input address generator
-            rdata => mem_in_rd_data1); -- TODO: connect to pipeline input
-
+            rdata => mem_in_rd_data1);
+    
+    -- Pre-processing to truncate magnitudes and directionals
+    U_PREPROCESSING1 : entity work.preprocessing_blk
+      port map(clk, rst,
+        magn_in  => unsigned(mem_in_rd_data1(C_MEM_IN_WIDTH-1   downto C_MEM_IN_WIDTH/2)),
+        dir_in   => unsigned(mem_in_rd_data1(C_MEM_IN_WIDTH/2-1 downto 0)),
+        
+        grd_pair_out => grd_set(0)       
+      );
+    
     --this part delays the address enable of the 2nd input RAM
     addr_delay1to2_en : entity work.reg_sync
       port map(
@@ -143,8 +162,17 @@ begin
             waddr => mem_in_wr_addr2,
             wdata => mem_in_wr_data,
             raddr => mem_in_rd_addr,  -- TODO: connect to input address generator
-            rdata => mem_in_rd_data2); -- TODO: connect to pipeline input
+            rdata => mem_in_rd_data2);
 
+    -- Pre-processing to truncate magnitudes and directionals
+    U_PREPROCESSING2 : entity work.preprocessing_blk
+      port map(clk, rst,
+        magn_in  => unsigned(mem_in_rd_data2(C_MEM_IN_WIDTH-1   downto C_MEM_IN_WIDTH/2)),
+        dir_in   => unsigned(mem_in_rd_data2(C_MEM_IN_WIDTH/2-1 downto 0)),
+        
+        grd_pair_out => grd_set(1)       
+      );
+    
     --this part delays the address enable of the 3rd input RAM
     addr_delay2to3_en : entity work.reg_sync
       port map(
@@ -180,10 +208,45 @@ begin
             waddr => mem_in_wr_addr3,
             wdata => mem_in_wr_data,
             raddr => mem_in_rd_addr,  -- TODO: connect to input address generator
-            rdata => mem_in_rd_data3); -- TODO: connect to pipeline input
+            rdata => mem_in_rd_data3);
+        
+    -- Pre-processing to truncate magnitudes and directionals
+    U_PREPROCESSING3 : entity work.preprocessing_blk
+      port map(clk, rst,
+        magn_in  => unsigned(mem_in_rd_data3(C_MEM_IN_WIDTH-1   downto C_MEM_IN_WIDTH/2)),
+        dir_in   => unsigned(mem_in_rd_data3(C_MEM_IN_WIDTH/2-1 downto 0)),
+        
+        grd_pair_out => grd_set(2)
+      );
 	------------------------------------------------------------------------------
-
-
+  
+  -- Smart buffer
+  -- Organizes the RAM outputs into a 3x3 block of gradient data
+  SMART_BUFF : entity work.smart_buffer(ARCH_SMART_BUFF_0)
+  port map (clk, rst,
+    grd_set_in  => grd_set,
+    
+    grd_arr_out => grd_blk
+  );
+  
+  -- Extract the directional set and magnitude block from the gradient block
+  dir_set <= extract_dir_set(grd_blk);
+  magn_blk <= extract_magn_blk(grd_blk);
+  
+  -- Canny datapath
+  -- Accepts the directional set and magnitude block of the buffer and
+  -- calculates the threshold bit for these inputs
+  DATAPATH : entity work.datapath(ARCH_DATAPATH_0)
+  port map (clk, rst,
+    dir_arr  => dir_set,
+    magn_blk => magn_blk,
+    
+    thresh_out => thresh_out
+  );
+  
+  -- Memory out data is the threholded output
+  mem_out_wr_data <= (0 => thresh_out(0), others => '0');
+  
 	------------------------------------------------------------------------------
     -- output memory
     -- written to by controller+datapath
@@ -197,22 +260,10 @@ begin
             clk   => clk,
             wen   => mem_out_wr_en,
             waddr => mem_out_wr_addr,  -- TODO: connect to output address generator
-            wdata => mem_out_wr_data,  -- TODO: connect to pipeline output
+            wdata => mem_out_wr_data,
             raddr => mem_out_rd_addr,
             rdata => mem_out_rd_data);
 	------------------------------------------------------------------------------
-
-
-	-- TODO: INCLUDE DATA_PATH FROM MAX. THIS IS THE DATA_PATH FROM LAB5 CURRENTLY
---	data_path : entity work.datapath
---	   port map(
---	      clk => clk,
---	      rst => rst,
---	      in_data => mem_in_rd_data,
---	      valid_in => valid_in_bit,
---	      valid_out => mem_out_wr_en,
---	      out_data => mem_out_wr_data
---	   );
 
   mem_in_address : entity work.addr_gen
     generic map (

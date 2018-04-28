@@ -13,13 +13,12 @@ use work.canny_header.all ;
 --------------------------------------------------------------------------------------------------
 entity preprocessing_blk is
   port (
-    clk, rst : in  std_logic ;
+    clk, rst     : in  std_logic ;
     
-    magn_in  : in  raw_magn ;
-    dir_in   : in  raw_dir ;
+    magn_in      : in  raw_magn ;
+    dir_in       : in  raw_dir ;
     
-    magn_out : out grd_magn ;
-    dir_out  : out grd_dir
+    grd_pair_out : out grd_pair
   );
 end entity ;
 
@@ -33,8 +32,8 @@ begin
     if (rising_edge(clk)) then
       dir_intrm := dir_in + 180 ;
 		
-      magn_out <= magn_in(WIDTH_RAW_MAGN-1 downto WIDTH_RAW_MAGN-WIDTH_GRD_MAGN) ;
-      dir_out  <= dir_intrm(WIDTH_RAW_DIR-1 downto WIDTH_RAW_DIR-WIDTH_GRD_DIR) ;
+      grd_pair_out.magn <= magn_in(WIDTH_RAW_MAGN-1 downto WIDTH_RAW_MAGN-WIDTH_GRD_MAGN) ;
+      grd_pair_out.dir  <= dir_intrm(WIDTH_RAW_DIR-1 downto WIDTH_RAW_DIR-WIDTH_GRD_DIR) ;
     end if ;
   end process ;
 end architecture ;
