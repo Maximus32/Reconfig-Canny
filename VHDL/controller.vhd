@@ -83,7 +83,7 @@ architecture behavior of controller is
           addr_in_en <= '0';
           valid_data <= '0';
 
-          if PIPE_CLEAR = "0010" then --once the pipeline has sent the last valid data, set done = '1'
+          if PIPE_CLEAR = "0011" then --once the pipeline has sent the last valid data, set done = '1'
             STATE <= DONE_STATE;
             done <= '1';
           else
