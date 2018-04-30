@@ -72,16 +72,19 @@ begin
     wait for 20 ns;
     rst <= '0';
     
-    -- Write column and row counts
+    -- Write column, row, and size values
     mmap_write(C_ROWS_ADDR, cnv(IMG_HEIGHT, C_MEM_IN_WIDTH), mmap_rd_en, mmap_wr_en, mmap_wr_addr, mmap_wr_data);
     mmap_write(C_COLS_ADDR, cnv(IMG_WIDTH, C_MEM_IN_WIDTH), mmap_rd_en, mmap_wr_en, mmap_wr_addr, mmap_wr_data);
+    mmap_write(C_SIZE_ADDR, cnv(2**(C_MEM_ADDR_WIDTH-11)-2, C_MEM_IN_WIDTH), mmap_rd_en, mmap_wr_en, mmap_wr_addr, mmap_wr_data);
     
     -- Asset 'GO' signal
     mmap_write(C_GO_ADDR, (0 => '1', others => '0'), mmap_rd_en, mmap_wr_en, mmap_wr_addr, mmap_wr_data);
     
     -- Wait for 'DONE' signal to be asserted
-    while mmap_rd_data = cnv(0, C_MEM_IN_WIDTH) loop
+    while not(mmap_rd_data = cnv(1, C_MEM_IN_WIDTH)) loop
       mmap_read(C_DONE_ADDR, mmap_rd_en, mmap_wr_en, mmap_rd_addr);
+      
+      wait for 20 ns;
     end loop;
     
     wait for 60 ns;

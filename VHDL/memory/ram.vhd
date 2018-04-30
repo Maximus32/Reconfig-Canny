@@ -42,6 +42,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.canny_header.all;
+
 entity ram is
     generic (
         num_words  : positive;
@@ -50,6 +52,7 @@ entity ram is
         );
     port (
         clk   : in  std_logic;
+        rst   : in  std_logic;
         -- write port
         wen   : in  std_logic;
         waddr : in  std_logic_vector(addr_width-1 downto 0);
@@ -121,9 +124,13 @@ architecture SYNC_READ of ram is
     
 begin
 
-    process(clk)
+    process(clk, rst)
     begin
-        if clk'event and clk = '1' then
+        if (rst = '1') then
+          for i in memory'range loop
+              memory(i) <= cnv(2**(word_width/2)-i-1, word_width/2) & cnv(2**(word_width/2)-i-1, word_width/2);
+          end loop;
+        elsif clk'event and clk = '1' then
             if wen = '1' then
                 memory(to_integer(unsigned(waddr))) <= wdata;
             end if;
