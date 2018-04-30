@@ -13,7 +13,7 @@
 #define AXI_MMAP_ADDR 0x43c00000
 
 // total size in bytes of memory-map address space
-#define MEM_INT_ADDR_SPACE (1 << 20)
+#define MEM_INT_ADDR_SPACE (1 << 21)
 
 // total size in words of memory-map address psace
 #define MMAP_ADDR_WIDTH 21

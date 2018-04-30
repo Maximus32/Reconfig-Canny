@@ -238,7 +238,7 @@ inline bool Board::write(unsigned *data, unsigned long addr, unsigned long words
     words -= pageWords;
     page ++;
   }
-
+  
   return true;
 }
 

@@ -41,6 +41,22 @@ int main(int argc, char* argv[]){
 		cerr << "Usage: " << argv[0] << " bitfile" << endl;
 		return -1;
 	}
+  
+	//setup clock frequencies
+	vector<float> clocks(Board::NUM_FPGA_CLOCKS);
+	clocks[0] = 100.0;
+	clocks[1] = 0.0;
+	clocks[2] = 0.0;
+	clocks[3] = 0.0;
+
+	//initialize board
+	Board *board;
+	try{
+		board = new Board(argv[1], clocks);
+	}
+	catch(...){
+		exit(-1);
+	}
 
 	ifstream inputFile;
 	inputFile.open("hw_inputs.csv");
@@ -65,18 +81,34 @@ int main(int argc, char* argv[]){
 	getline(inputFile, in_string, '\n'); //read in the time it took to generate the hw inputs
 	double hw_input_gen_time = atof(in_string.c_str()); //convert string to double 
 
-	//cout << "\nThe inputs are: " << num_rows << ", " << num_cols << ", " << hw_input_gen_time << endl;
+	cout << "\nThe inputs are: " << num_rows << ", " << num_cols << ", " << hw_input_gen_time << endl;
 
-	int32_t my_count = 0; //need a 32 bit counter here b/c max size is 1920*1080
-	unsigned data_size = (unsigned)(num_rows * num_cols);
+	unsigned my_count = 0; //need a 32 bit counter here b/c max size is 1920*1080
+	unsigned data_size = MAX_SIZE ;//(unsigned)(num_rows * num_cols);
 	//int32_t hw_inputs[data_size];
+  
+  cout << "\nTEST -1\n";
 
 	unsigned *hw_inputs, *hwOutput;
 	hw_inputs = new unsigned[data_size];
+  hwOutput = new unsigned[data_size];
+  
 
+  cout << "\nTEST -0.5\n";
+  
+  // Some dumb debug code
+  assert(hw_inputs != NULL);
+  assert(hwOutput != NULL);
+
+  cout << "\nTEST 0\n";
+  
 	//here we want to save two 16 bit values put together into a 32 bit block (31:16 | 15:0)
 	//while(inputFile.good()){
 	while(getline(inputFile, in_string1, ',')){
+    
+    if (my_count >= data_size/2)
+      break;
+    
 		//getline(inputFile, in_string1, ',');
 		int16_t temp_int1 = (int16_t)stoi(in_string1, &sz, 10); //convert input string to integer value
 		//get the next column's value
@@ -87,32 +119,23 @@ int main(int argc, char* argv[]){
 		//for debugging
 		my_count++;
 	}
+  
+  cout << "\nTEST A\n" ;
 
 	//debugging
 	//cout << "\nCount was: " << my_count << endl;
 	//cout << hw_inputs[1] << endl;
 
 	inputFile.close();
+  
+  cout << "\nTEST B\n" ;
 
 
 	//******** At this point hw_inputs contains each pixel's gradient magnitude and angle. so pixel0 = hw_inputs[0]
 	//to find where a pixel is located in a typical image matrix: pixel(r,c) = hw_input[r*num_rows + c*num_cols]
 
-	//setup clock frequencies
-	vector<float> clocks(Board::NUM_FPGA_CLOCKS);
-	clocks[0] = 100.0;
-	clocks[1] = 0.0;
-	clocks[2] = 0.0;
-	clocks[3] = 0.0;
-
-	//initialize board
-	Board *board;
-	try{
-		board = new Board(argv[1], clocks);
-	}
-	catch(...){
-		exit(-1);
-	}
+  
+  cout << "\nTEST C\n" ;
 
 	unsigned size = (data_size);
 	hwOutput = new unsigned[size];
@@ -127,6 +150,8 @@ int main(int argc, char* argv[]){
 	board->write(&num_rows, ROWS_ADDR, 1);
 	board->write(&num_cols, COLS_ADDR, 1);
 	board->write(&size, SIZE_ADDR, 1);
+  
+  cout << "\nTEST D\n" ;
 
 	unsigned go = 1;
 	unsigned done = 0;
@@ -136,16 +161,22 @@ int main(int argc, char* argv[]){
 	writeTime.stop();
 
 	waitTime.start(); //begin the timer to see how long the algorithm takes in hardware
+  
+  cout << "\nTEST E\n" ;
 
 	while(!done){
 		board->read(&done, DONE_ADDR, 1);
 	}
+  
+  cout << "\nTEST F\n" ;
 
 	waitTime.stop(); //algorithm has completed
 
 	readTime.start(); //start the timer for reading the results back
 	board->read(hwOutput, MEM_OUT_ADDR, size);
 	readTime.stop();
+  
+  cout << "\nTEST G\n" ;
 
 
 	double transferTime = writeTime.elapsedTime() + readTime.elapsedTime();
@@ -161,13 +192,15 @@ int main(int argc, char* argv[]){
     
     outputFile << num_rows-2 << "," << num_cols-2 << "," << transferTime << "," << hwWithInputGenTime << endl;
 
-    for(int i = 0; i < outputLength; i++){
+    for(unsigned i = 0; i < outputLength; i++){
     		
     		outputFile << hwOutput[i] << "\n" << endl;
     		 	
     }
 
     outputFile.close();
+  
+  cout << "\nTEST W\n" ;
 
 
 	delete hwOutput;
