@@ -107,7 +107,7 @@ begin
     -- read from by controller+datapath
     U_MEM_IN1 : entity work.ram(SYNC_READ)
         generic map (
-            num_words  => 2**C_MEM_ADDR_WIDTH,
+            num_words  => 2**(C_MEM_ADDR_WIDTH-11),
             word_width => C_MEM_IN_WIDTH,
             addr_width => C_MEM_ADDR_WIDTH)
         port map (
@@ -153,7 +153,7 @@ begin
     -- read from by controller+datapath
     U_MEM_IN2 : entity work.ram(SYNC_READ)
         generic map (
-            num_words  => 2**C_MEM_ADDR_WIDTH,
+            num_words  => 2**(C_MEM_ADDR_WIDTH-11),
             word_width => C_MEM_IN_WIDTH,
             addr_width => C_MEM_ADDR_WIDTH)
         port map (
@@ -199,7 +199,7 @@ begin
     -- read from by controller+datapath
     U_MEM_IN3 : entity work.ram(SYNC_READ)
         generic map (
-            num_words  => 2**C_MEM_ADDR_WIDTH,
+            num_words  => 2**(C_MEM_ADDR_WIDTH-11),
             word_width => C_MEM_IN_WIDTH,
             addr_width => C_MEM_ADDR_WIDTH)
         port map (
@@ -253,7 +253,7 @@ begin
     -- read from by memory map
     U_MEM_OUT : entity work.ram(SYNC_READ)
         generic map (
-            num_words  => 2**C_MEM_ADDR_WIDTH,
+            num_words  => 2**(C_MEM_ADDR_WIDTH-11),
             word_width => C_MEM_OUT_WIDTH,
             addr_width => C_MEM_ADDR_WIDTH)
         port map (

@@ -160,11 +160,11 @@ package body canny_header is
   -- Accepts a gradient pair block
   -- Returns the magnitude set
   function extract_magn_blk (blk : grd_pair_blk) return grd_magn_blk is
-    variable magn_set : grd_magn_blk ;
+    variable magn_blk : grd_magn_blk ;
   begin
-    for i in 0 to BLOCK_W-2-1 loop
-      magn_set(i) := blk(i).magn;
+    for i in 0 to BLOCK_SIZE-1 loop
+      magn_blk(i) := blk(i).magn;
     end loop;
-    return magn_set;
+    return magn_blk;
   end extract_magn_blk;
 end canny_header;
