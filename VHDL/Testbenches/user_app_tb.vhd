@@ -82,28 +82,6 @@ begin
         rst <= '1';
         clearMMAP;
         wait for 200 ns;
-        
-        -- Load memory into input RAMs
-        mmap_wr_en   <= '1';
-        mmap_wr_addr <= (others => '0');
-        while (not endfile(mem_input_magn)) loop
-          wait until falling_edge(clk);
-          
-          -- Read magnitude word
-          readline(mem_input_magn, line_str);
-          read(line_str, tmp1);
-          report "Read in: " & integer'image(tmp1);
-          
-          -- Read directional word
-          readline(mem_input_dir, line_str);
-          read(line_str, tmp2);
-          report "Read in: " & integer'image(tmp2);
-          
-          mmap_wr_data <= std_logic_vector(to_unsigned(tmp1, C_MMAP_DATA_WIDTH/2)) & std_logic_vector(to_unsigned(tmp2+180, C_MMAP_DATA_WIDTH/2));
-          
-          -- Increment address
-          mmap_wr_addr <= std_logic_vector(unsigned(mmap_wr_addr) + 1);
-        end loop;
 
         rst <= '0';
         wait until clk'event and clk = '1';
@@ -139,6 +117,28 @@ begin
         mmap_wr_data <= std_logic_vector(to_unsigned(1, C_MMAP_DATA_WIDTH));
         wait until clk'event and clk = '1';
         clearMMAP;
+        
+        -- Load memory into input RAMs
+        mmap_wr_en   <= '1';
+        mmap_wr_addr <= (others => '0');
+        while (not endfile(mem_input_magn)) loop
+          wait until falling_edge(clk);
+          
+          -- Read magnitude word
+          readline(mem_input_magn, line_str);
+          read(line_str, tmp1);
+          report "Read in: " & integer'image(tmp1);
+          
+          -- Read directional word
+          readline(mem_input_dir, line_str);
+          read(line_str, tmp2);
+          report "Read in: " & integer'image(tmp2);
+          
+          mmap_wr_data <= std_logic_vector(to_unsigned(tmp1, C_MMAP_DATA_WIDTH/2)) & std_logic_vector(to_unsigned(tmp2+180, C_MMAP_DATA_WIDTH/2));
+          
+          -- Increment address
+          mmap_wr_addr <= std_logic_vector(unsigned(mmap_wr_addr) + 1);
+        end loop;
 
         done  := '0';
         count := 0;
