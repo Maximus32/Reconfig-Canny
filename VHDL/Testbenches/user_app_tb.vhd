@@ -37,8 +37,9 @@ architecture behavior of user_app_tb is
 
     signal sim_done : std_logic := '0';
     
-    file   mem_input_magn : text open read_mode is "mem_input_magn.txt";
-    file   mem_input_dir  : text open read_mode is "mem_input_dir.txt";
+    file   mem_input_magn : text open read_mode  is "mem_input_magn.txt";
+    file   mem_input_dir  : text open read_mode  is "mem_input_dir.txt";
+    file   mem_output     : text open write_mode is "mem_output.txt";
 begin
 
     UUT : entity work.user_app
@@ -68,14 +69,14 @@ begin
         variable total_points : real    := 50.0;
         variable min_grade    : real    := total_points*0.25;
         variable grade        : real;
-
-        variable result : std_logic_vector(C_MMAP_DATA_WIDTH-1 downto 0);
+        
         variable done   : std_logic;
         variable count  : integer;
         
         variable line_str : line;
         
         variable tmp1, tmp2 : integer;
+        variable result : std_logic_vector(C_MMAP_DATA_WIDTH-1 downto 0);
     begin
 
         -- reset circuit
@@ -169,11 +170,16 @@ begin
         for i in 0 to TEST_SIZE-1 loop
             mmap_rd_addr   <= std_logic_vector(to_unsigned(i, C_MMAP_ADDR_WIDTH));
             mmap_rd_en     <= '1';
+            
             wait until clk'event and clk = '1';
             clearMMAP;
+            
             -- give entity one cycle to respond
             wait until clk'event and clk = '1';
-            result := mmap_rd_data;
+            
+            -- Write output element to file
+            write(line_str, to_integer(unsigned(mmap_rd_data)));
+            writeline(mem_output, line_str);
         end loop;  -- i
 
         report "SIMULATION FINISHED!!!";
