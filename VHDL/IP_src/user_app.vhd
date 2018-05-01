@@ -53,6 +53,7 @@ architecture default of user_app is
     --temp signals for datapath
     signal valid_in_bit : std_logic;
 
+    signal mem_in_rst_addr   : std_logic;
     signal reset_addresses   : std_logic;
     signal address_in_enable : std_logic;
     signal wr_en_2           : std_logic;
@@ -140,7 +141,7 @@ begin
       addr_mem2 : entity work.address_gen_other_ram
         port map(
           clk      => clk,
-          rst      => rst,
+          rst      => mem_in_rst_addr,
           en       => wr_en_2,
           addr_out => mem_in_wr_addr2
       );
@@ -158,7 +159,7 @@ begin
             wen   => wr_en_2,
             waddr => mem_in_wr_addr2,
             wdata => mem_in_wr_data,
-            raddr => mem_in_rd_addr,  -- TODO: connect to input address generator
+            raddr => mem_in_rd_addr,
             rdata => mem_in_rd_data2);
 
     -- Pre-processing to truncate magnitudes and directionals
@@ -180,13 +181,13 @@ begin
         data_out => wr_en_3
       );
 
-      addr_mem3 : entity work.address_gen_other_ram
-        port map(
-          clk      => clk,
-          rst      => rst,
-          en       => wr_en_3,
-          addr_out => mem_in_wr_addr3
-      );
+    addr_mem3 : entity work.address_gen_other_ram
+      port map(
+        clk      => clk,
+        rst      => mem_in_rst_addr,
+        en       => wr_en_3,
+        addr_out => mem_in_wr_addr3
+    );
 
     -- input memory
     -- written to by memory map
@@ -283,7 +284,8 @@ begin
       valid_data => valid_in_bit,
       size_out => size_signal,
       addr_in_en => address_in_enable,
-      rst_addr => reset_addresses
+      rst_addr => reset_addresses,
+      rst_in_addr => mem_in_rst_addr
     );
 
     mem_out_address : entity work.addr_gen
