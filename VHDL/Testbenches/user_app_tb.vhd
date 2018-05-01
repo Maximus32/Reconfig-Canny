@@ -89,18 +89,6 @@ begin
         wait until clk'event and clk = '1';
         wait until clk'event and clk = '1';
 
-        -- write contents to input ram, which starts at addr 0
-        for i in 0 to TEST_SIZE-1 loop
-            mmap_wr_addr <= std_logic_vector(to_unsigned(i, C_MMAP_ADDR_WIDTH));
-            mmap_wr_en   <= '1';
-            mmap_wr_data <= std_logic_vector(to_unsigned((i*4) mod 256, 8) &
-                                             to_unsigned((i*4+1) mod 256, 8) &
-                                             to_unsigned((i*4+2) mod 256, 8) &
-                                             to_unsigned((i*4+3) mod 256, 8));
-            wait until clk'event and clk = '1';
-            clearMMAP;
-        end loop;
-
         -- send size
         mmap_wr_addr <= C_SIZE_ADDR;
         mmap_wr_en   <= '1';
@@ -121,6 +109,21 @@ begin
         mmap_wr_data <= std_logic_vector(to_unsigned(20, C_MMAP_DATA_WIDTH));
         wait until clk'event and clk = '1';
         clearMMAP;
+
+        wait until clk'event and clk = '1';
+        wait until clk'event and clk = '1';
+
+        -- write contents to input ram, which starts at addr 0
+        for i in 0 to TEST_SIZE-1 loop
+            mmap_wr_addr <= std_logic_vector(to_unsigned(i, C_MMAP_ADDR_WIDTH));
+            mmap_wr_en   <= '1';
+            mmap_wr_data <= std_logic_vector(to_unsigned((i*4) mod 256, 8) &
+                                             to_unsigned((i*4+1) mod 256, 8) &
+                                             to_unsigned((i*4+2) mod 256, 8) &
+                                             to_unsigned((i*4+3) mod 256, 8));
+            wait until clk'event and clk = '1';
+            clearMMAP;
+        end loop;
 
         -- send go = 1 over memory map
         mmap_wr_addr <= C_GO_ADDR;
