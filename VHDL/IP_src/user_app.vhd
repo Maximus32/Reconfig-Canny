@@ -240,8 +240,8 @@ begin
   );
 
   -- Memory out data is the threholded output
-  mem_out_wr_data <= (0 => thresh_out(0), others => '0');
-
+  --mem_out_wr_data <= (0 => thresh_out(0), others => '0');
+  mem_out_wr_data <= (others => thresh_out(0));
 	------------------------------------------------------------------------------
     -- output memory
     -- written to by controller+datapath
