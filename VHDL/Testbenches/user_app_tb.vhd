@@ -14,12 +14,14 @@ use ieee.numeric_std.all;
 use work.config_pkg.all;
 use work.user_pkg.all;
 
+use std.textio.all;
+
 entity user_app_tb is
 end user_app_tb;
 
 architecture behavior of user_app_tb is
 
-    constant TEST_SIZE : integer := 100;
+    constant TEST_SIZE : integer := 144*196;
     constant MAX_CYCLES : integer  := TEST_SIZE*4;
 
     signal clk : std_logic := '0';
@@ -34,7 +36,9 @@ architecture behavior of user_app_tb is
     signal mmap_rd_data : std_logic_vector(MMAP_DATA_RANGE);
 
     signal sim_done : std_logic := '0';
-
+    
+    file   mem_input_magn : text open read_mode is "mem_input_magn.txt";
+    file   mem_input_dir  : text open read_mode is "mem_input_dir.txt";
 begin
 
     UUT : entity work.user_app
@@ -54,15 +58,6 @@ begin
     -- process to test different inputs
     process
 
-        -- function to check if the outputs is correct
-        function checkOutput (
-            i : integer)
-            return integer is
-
-        begin
-            return ((i*4) mod 256)*((i*4+1) mod 256) + ((i*4+2) mod 256)*((i*4+3) mod 256);
-        end checkOutput;
-
         procedure clearMMAP is
         begin
             mmap_rd_en <= '0';
@@ -77,7 +72,10 @@ begin
         variable result : std_logic_vector(C_MMAP_DATA_WIDTH-1 downto 0);
         variable done   : std_logic;
         variable count  : integer;
-
+        
+        variable line_str : line;
+        
+        variable tmp1, tmp2 : integer;
     begin
 
         -- reset circuit
@@ -99,32 +97,43 @@ begin
         -- send rows
         mmap_wr_addr <= C_ROWS_ADDR;
         mmap_wr_en   <= '1';
-        mmap_wr_data <= std_logic_vector(to_unsigned(5, C_MMAP_DATA_WIDTH));
+        mmap_wr_data <= std_logic_vector(to_unsigned(144, C_MMAP_DATA_WIDTH));
         wait until clk'event and clk = '1';
         clearMMAP;
 
         -- send cols
         mmap_wr_addr <= C_COLS_ADDR;
         mmap_wr_en   <= '1';
-        mmap_wr_data <= std_logic_vector(to_unsigned(20, C_MMAP_DATA_WIDTH));
+        mmap_wr_data <= std_logic_vector(to_unsigned(196, C_MMAP_DATA_WIDTH));
         wait until clk'event and clk = '1';
         clearMMAP;
 
         wait until clk'event and clk = '1';
         wait until clk'event and clk = '1';
 
-        -- write contents to input ram, which starts at addr 0
-        for i in 0 to TEST_SIZE-1 loop
-            mmap_wr_addr <= std_logic_vector(to_unsigned(i, C_MMAP_ADDR_WIDTH));
-            mmap_wr_en   <= '1';
-            mmap_wr_data <= std_logic_vector(to_unsigned((i*4) mod 256, 8) &
-                                             to_unsigned((i*4+1) mod 256, 8) &
-                                             to_unsigned((i*4+2) mod 256, 8) &
-                                             to_unsigned((i*4+3) mod 256, 8));
-            wait until clk'event and clk = '1';
-            clearMMAP;
+        -- Load memory into input RAMs
+        mmap_wr_en   <= '1';
+        mmap_wr_addr <= (others => '0');
+        while (not endfile(mem_input_magn)) loop
+          wait until falling_edge(clk);
+          
+          -- Read magnitude word
+          readline(mem_input_magn, line_str);
+          read(line_str, tmp1);
+          report "Read in: " & integer'image(tmp1);
+          
+          -- Read directional word
+          readline(mem_input_dir, line_str);
+          read(line_str, tmp2);
+          report "Read in: " & integer'image(tmp2);
+          
+          mmap_wr_data <= std_logic_vector(to_unsigned(tmp1, C_MMAP_DATA_WIDTH/2)) & std_logic_vector(to_unsigned(tmp2+180, C_MMAP_DATA_WIDTH/2));
+          
+          -- Increment address
+          mmap_wr_addr <= std_logic_vector(unsigned(mmap_wr_addr) + 1);
         end loop;
-
+        clearMMAP;
+        
         -- send go = 1 over memory map
         mmap_wr_addr <= C_GO_ADDR;
         mmap_wr_en   <= '1';
@@ -165,14 +174,6 @@ begin
             -- give entity one cycle to respond
             wait until clk'event and clk = '1';
             result := mmap_rd_data;
-
-            if (unsigned(result) /= checkOutput(i)) then
-                errors := errors + 1;
-                report "Result for " & integer'image(i) &
-                    " is incorrect. The output is " &
-                    integer'image(to_integer(unsigned(result))) &
-                    " but should be " & integer'image(checkOutput(i));
-            end if;
         end loop;  -- i
 
         report "SIMULATION FINISHED!!!";
