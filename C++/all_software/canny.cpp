@@ -56,17 +56,17 @@ canny::canny(String filename)
 
     cout << "\nsw time: " << swTime.elapsedTime() << " seconds to complete canny algorithm" << endl;
 
+    FPGA_impl = readFPGA(); //get the FPGA outputs into Mat format
+
 	namedWindow("Original");  
     namedWindow("Software Output");
+    namedWindow("FPGA Output");
+
 
     imshow("Original", img);                  
     imshow("Software Output", non);
-
-
-    FPGA_impl = readFPGA(); //get the FPGA outputs into Mat format
-
-    namedWindow("FPGA Output");
     imshow("FPGA Output", FPGA_impl);
+    
 
     cv::waitKey(0); //this line of code keeps the images shown
 	}
@@ -250,6 +250,8 @@ Mat canny::nonMaxSupp()
         }
     }
 
+    cout << nonMaxSupped.rows << " " << nonMaxSupped.cols << endl;
+
     return nonMaxSupped;
 }
 
@@ -328,15 +330,19 @@ Mat canny::readFPGA(){
 
     //here we read in the output values from the FPGA, then print the image it produced
     ifstream inputFile;
-    inputFile.open("hw_outputs.csv");
+    //inputFile.open("hw_outputs.csv");
+    inputFile.open("mem_output_mario.txt");
 
     if(!inputFile.is_open()){
-        cout << "\nError opening csv file!" << endl;
+        cout << "\nError opening file!" << endl;
     }
 
     string::size_type sz;
     string in_string, in_string1;
     
+    //below is commented out due to hw not working, so this output file is from simulation
+    /*
+
     //first two lines are garbage inputs from zed board
     getline(inputFile, in_string, '\n');
     getline(inputFile, in_string, '\n');
@@ -354,30 +360,37 @@ Mat canny::readFPGA(){
     getline(inputFile, in_string, '\n'); //read in the time it took to generate the hw inputs
     double hwTime = atof(in_string.c_str()); //convert string to double
 
+	*/
+
+    unsigned num_rows = 142;
+    unsigned num_cols = 190;
+
     Mat returnMat = Mat(num_rows, num_cols, CV_8UC1); //r x c in size and contains 8 bit values (0-255)
 
-    cout << num_rows << " " << num_cols << endl;
+    //cout << num_rows << " " << num_cols << endl;
 
+   
+    
     int i = 0;
 
-    while(inputFile.is_open()){
+    for(; i < num_rows; i++){
 
         for(int j = 0; j < num_cols; j++){
 
             getline(inputFile, in_string1, '\n');
             returnMat.at<uchar>(i,j) = (uchar)(stoi(in_string1, &sz, 10));
-            //int temp = stoi(in_string1, &sz, 10);
-            //returnMat.at<uchar>(i,j) = (unsigned char)temp & 0xFF;
-        }
-        i++;
-        if(i == num_rows){
-            inputFile.close();
+            
         }
     }
+	
 
-    cout << "\nThe FPGA took " << transferTime << " seconds in transfer time, and " << hwTime << " seconds to do the canny algorithm" << endl;
+   
 
-    cout << "\n\nThe size of the FPGA output is: " << returnMat.rows << " x " << returnMat.cols << endl;
+    inputFile.close();
+
+    //cout << "\nThe FPGA took " << transferTime << " seconds in transfer time, and " << hwTime << " seconds to do the canny algorithm" << endl;
+
+    //cout << "\n\nThe size of the FPGA output is: " << returnMat.rows << " x " << returnMat.cols << endl;
     return returnMat;
 
 }

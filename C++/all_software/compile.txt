@@ -1,5 +1,0 @@
-g++ "cpp filename" -o "output filename" `pkg-config --cflags --libs opencv`
-
-
-sFiltered.at<uint16>(i, j) is the magnitude
-angles.at is the angle
