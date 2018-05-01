@@ -258,7 +258,7 @@ begin
             addr_width => C_MEM_ADDR_WIDTH)
         port map (
             clk   => clk,
-            wen   => mem_out_wr_en,
+            wen   => valid_in_bit,
             waddr => mem_out_wr_addr,  -- TODO: connect to output address generator
             wdata => mem_out_wr_data,
             raddr => mem_out_rd_addr,
