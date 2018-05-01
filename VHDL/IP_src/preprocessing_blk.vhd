@@ -28,8 +28,12 @@ begin
     variable dir_intrm  : raw_dir ;
   begin
     
+    -- On async reset...
+    if (rst = '1') then
+      grd_pair_out <= GRD_PAIR_ZERO ;
+      
     -- On clk rising edge...
-    if (rising_edge(clk)) then
+    elsif (rising_edge(clk)) then
       dir_intrm := dir_in + 180 ;
 		
       grd_pair_out.magn <= magn_in(WIDTH_RAW_MAGN-1 downto WIDTH_RAW_MAGN-WIDTH_GRD_MAGN) ;

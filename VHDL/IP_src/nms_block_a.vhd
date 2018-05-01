@@ -30,8 +30,18 @@ begin
     variable index_b : natural ;
   begin
     
+    -- On async reset...
+    if (rst = '1') then
+      for i in 0 to BLOCK_W-2-1 loop
+        magn_a(i) <= cnv_u(0, WIDTH_GRD_MAGN) ;
+        magn_b(i) <= cnv_u(0, WIDTH_GRD_MAGN) ;
+        
+        -- Center pixel magnitude
+        magn_center(i) <= cnv_u(0, WIDTH_GRD_MAGN) ;
+      end loop;
+      
     -- On clk rising edge...
-    if (rising_edge(clk)) then
+    elsif (rising_edge(clk)) then
       
       -- Calculate indices of magnitudes
       for i in 0 to BLOCK_W-2-1 loop

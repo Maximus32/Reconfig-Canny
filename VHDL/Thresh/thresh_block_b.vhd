@@ -26,8 +26,14 @@ begin
   process(clk)
   begin
     
+    -- On async reset...
+    if (rst = '1') then
+      for i in 0 to BLOCK_W-2-1 loop
+        thresh_out(i) <= '0' ;
+      end loop;
+      
     -- On clk rising edge...
-    if (rising_edge(clk)) then
+    elsif (rising_edge(clk)) then
       for i in 0 to BLOCK_W-2-1 loop
         thresh_out(i) <= thresh_nms(i) and thresh_ths(i) ;
       end loop ;

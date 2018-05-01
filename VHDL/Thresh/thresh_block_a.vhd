@@ -26,8 +26,15 @@ begin
   process(clk)
   begin
     
+    -- On async reset...
+    if (rst = '1') then
+      for i in 0 to BLOCK_W-2-1 loop
+        pass_high(i) <= '0' ;
+        pass_low(i)  <= '0' ;
+      end loop;
+      
     -- On clk rising edge...
-    if (rising_edge(clk)) then
+    elsif (rising_edge(clk)) then
       for i in 0 to BLOCK_W-2-1 loop
       
         -- Check against high threshold
