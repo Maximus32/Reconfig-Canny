@@ -337,6 +337,10 @@ Mat canny::readFPGA(){
     string::size_type sz;
     string in_string, in_string1;
     
+    //first two lines are garbage inputs from zed board
+    getline(inputFile, in_string, '\n');
+    getline(inputFile, in_string, '\n');
+
     //first three values in csv file are rows, cols, transferTime, and hwExecutionTime
     getline(inputFile, in_string, ','); //read in the number of rows value (max = 1080)
     unsigned num_rows = unsigned(stoi(in_string, &sz, 10));
