@@ -11,6 +11,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use std.textio.all;
+
 use work.config_pkg.all;
 use work.user_pkg.all;
 
@@ -33,8 +35,9 @@ architecture behavior of user_app_tb is
     signal mmap_rd_addr : std_logic_vector(MMAP_ADDR_RANGE) := (others => '0');
     signal mmap_rd_data : std_logic_vector(MMAP_DATA_RANGE);
 
-    signal sim_done : std_logic := '0';
-
+    signal sim_done     : std_logic := '0';
+    
+    file   mem_input    : text open read_mode is "mem_input.txt";
 begin
 
     UUT : entity work.user_app
@@ -77,13 +80,31 @@ begin
         variable result : std_logic_vector(C_MMAP_DATA_WIDTH-1 downto 0);
         variable done   : std_logic;
         variable count  : integer;
-
+        
+        variable line_str: line;
+        variable tmp    : natural;
     begin
-
+        
         -- reset circuit
         rst <= '1';
         clearMMAP;
         wait for 200 ns;
+        
+        -- Load memory into input RAMs
+        mmap_wr_en   <= '1';
+        mmap_wr_addr <= (others => '0');
+        while (not endfile(mem_input)) loop
+          wait until falling_edge(clk);
+          
+          -- Read data word
+          readline(mem_input, line_str);
+          read(line_str, tmp);
+          mmap_wr_data <= std_logic_vector(to_unsigned(tmp, C_MMAP_DATA_WIDTH));
+          report "Read in: " & integer'image(tmp);
+          
+          -- Increment address
+          mmap_wr_addr <= std_logic_vector(unsigned(mmap_wr_addr) + 1);
+        end loop;
 
         rst <= '0';
         wait until clk'event and clk = '1';
@@ -112,18 +133,6 @@ begin
 
         wait until clk'event and clk = '1';
         wait until clk'event and clk = '1';
-
-        -- write contents to input ram, which starts at addr 0
-        for i in 0 to TEST_SIZE-1 loop
-            mmap_wr_addr <= std_logic_vector(to_unsigned(i, C_MMAP_ADDR_WIDTH));
-            mmap_wr_en   <= '1';
-            mmap_wr_data <= std_logic_vector(to_unsigned((i*4) mod 256, 8) &
-                                             to_unsigned((i*4+1) mod 256, 8) &
-                                             to_unsigned((i*4+2) mod 256, 8) &
-                                             to_unsigned((i*4+3) mod 256, 8));
-            wait until clk'event and clk = '1';
-            clearMMAP;
-        end loop;
 
         -- send go = 1 over memory map
         mmap_wr_addr <= C_GO_ADDR;
