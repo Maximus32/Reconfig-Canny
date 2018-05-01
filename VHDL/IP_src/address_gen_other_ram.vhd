@@ -28,8 +28,12 @@ signal addr_sig : std_logic_vector(C_MEM_ADDR_WIDTH-1 downto 0);
 
     if rst = '1' then
       addr_sig <= (others => '0');
-    elsif clk = '1' and clk'event and en = '1' then
-      addr_sig <= std_logic_vector(unsigned(addr_sig) + 1);
+    elsif clk = '1' and clk'event then
+      if en = '1' then
+        addr_sig <= std_logic_vector(unsigned(addr_sig) + 1);
+      else
+        addr_sig <= (others => '0');
+      end if;
     end if;
 
   end process;

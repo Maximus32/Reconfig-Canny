@@ -20,7 +20,7 @@ entity controller is
     valid_data   : out std_logic;
     size_out     : out std_logic_vector(C_MEM_ADDR_WIDTH downto 0);
     addr_in_en   : out std_logic;
-    --addr_out_en  : out std_logic; --make this the valid_data output from the datapath
+    rst_in_addr  : out std_logic;
     rst_addr     : out std_logic
   );
 
@@ -40,6 +40,8 @@ architecture behavior of controller is
 
   begin
 
+  size_out <= size; --Dave: just changed this to always output the size
+
   process(clk, rst)
   begin
 
@@ -49,7 +51,7 @@ architecture behavior of controller is
       addr_in_en <= '0';
       rst_addr <= '1';
       PIPE_CLEAR <= (others => '0');
-
+      rst_in_addr <= '1';
     elsif rising_edge(clk) then
       rst_addr <= '0';
 
@@ -57,9 +59,11 @@ architecture behavior of controller is
         when WAIT_STATE =>
           valid_data <= '0';
           rst_addr <= '1'; --clear the counters
+          rst_in_addr <= '0';
           if go = '1' then
             STATE <= GO_STATE;
-            size_out <= size;
+            --size_out <= size;
+            rst_in_addr <= '1';
             done <= '0';
           end if;
 
