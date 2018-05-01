@@ -21,7 +21,7 @@ end user_app_tb;
 
 architecture behavior of user_app_tb is
 
-    constant TEST_SIZE : integer := 144*196;
+    constant TEST_SIZE : integer := 144*192;
     constant MAX_CYCLES : integer  := TEST_SIZE*4;
 
     signal clk : std_logic := '0';
