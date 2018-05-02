@@ -1,3 +1,4 @@
+//  Modified April 2018 by David Watts for Reconfigurable computing final project
 //
 //  canny.h
 //  Canny Edge Detector
@@ -22,8 +23,10 @@ private:
     Mat gFiltered; // Gradient
     Mat sFiltered; //Sobel Filtered
     Mat angles; //Angle Map
+    Mat angles_dave; //
     Mat non; // Non-maxima supp.
     Mat thres; //Double threshold and final
+    Mat FPGA_impl; //use this matrix to output FPGA algo image
 public:
 
     canny(String); //Constructor
@@ -33,6 +36,7 @@ public:
     Mat sobel(); //Sobel filtering
     Mat nonMaxSupp(); //Non-maxima supp.
     Mat threshold(Mat, int, int); //Double threshold and finalize picture
+    Mat readFPGA();
 };
 
 #endif

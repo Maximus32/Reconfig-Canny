@@ -1,3 +1,4 @@
+//  Modified April 2018 by David Watts for Reconfigurable computing final project
 //
 //  main.cpp
 //  Canny Edge Detector
@@ -5,6 +6,8 @@
 //  Created by Hasan Akgün on 21/03/14.
 //  Copyright (c) 2014 Hasan Akgün. All rights reserved.
 //
+
+
 
 #include <iostream>
 #define _USE_MATH_DEFINES
@@ -19,8 +22,13 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    cv::String filePath = "index.jpeg"; //Filepath of input image
-    
+    //cv::String filePath = "index2.jpeg"; //Filepath of input image
+    if(argc != 2){
+    	cerr << "\nUsage: ./runFile imageName.jpeg" << endl;
+    	return -1;
+    }
+
+    String filePath = argv[1];
 
     canny cny(filePath);
         

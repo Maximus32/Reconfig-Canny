@@ -1,3 +1,4 @@
+//  Modified April 2018 by David Watts for Reconfigurable computing final project
 //
 //  canny.cpp
 //  Canny Edge Detector
@@ -7,12 +8,15 @@
 //
 
 #include <iostream>
+#include <fstream>
+#include <string>
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <vector>
 #include "canny.h"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
+#include "Timer.h"
 
 using namespace std;
 using namespace cv;
@@ -32,41 +36,36 @@ canny::canny(String filename)
 
 	vector<vector<double>> filter = createFilter(3, 3, 1);
 
-    //Print filter
-    for (int i = 0; i<filter.size(); i++) 
-    {
-        for (int j = 0; j<filter[i].size(); j++) 
-        {
-            cout << filter[i][j] << " ";
-        }
-    }
+    //cout << "\n#rows = " << img.rows << " #cols = " << img.cols << endl; //get image size from these values
 
-    cout << "\n#rows = " << img.rows << " #cols = " << img.cols << endl; //get image size from these values
-
-    //grayscaled = Mat(img.toGrayScale()); //Grayscale the image
+    //full canny edge algorithm done here 
+    //***************************************************************************************************************
     cvtColor(img, grayscaled, CV_BGR2GRAY);
     gFiltered = Mat(useFilter(grayscaled, filter)); //Gaussian Filter
     sFiltered = Mat(sobel()); //Sobel Filter
-
     non = Mat(nonMaxSupp()); //Non-Maxima Suppression
-    thres = Mat(threshold(non, 20, 40)); //Double Threshold and Finalize
-	
-	namedWindow("Original");  
-    namedWindow("GrayScaled");
-    namedWindow("Gaussian Blur");
-    namedWindow("Sobel Filtered");
-    namedWindow("Non-Maxima Supp.");
-    namedWindow("Final");
+    //thres = Mat(threshold(non, 20, 40)); //Double Threshold and Finalize
+	//***************************************************************************************************************
 
-    imshow("Original", img);                  
-    imshow("GrayScaled", grayscaled);
-    imshow("Gaussian Blur", gFiltered);
-    imshow("Sobel Filtered", sFiltered);
-    imshow("Non-Maxima Supp.", non);
-    imshow("Final", thres);
+    ofstream outputFile;
 
 
-    cv::waitKey(0);
+    outputFile.open("hw_outputs.csv"); //open the csv file
+
+    unsigned outputLength = non.rows * non.cols;
+    
+    outputFile << non.rows << "," << non.cols << "," << 0.5 << "," << 1.1 << endl;
+
+    for(int i = 0; i < non.rows; i++){
+        for(int j = 0; j < non.cols; j++){
+            outputFile << non.at<uint16_t>(i,j) << endl;
+        }           
+    }
+
+    cout << non.rows << " " << non.cols << endl;
+
+    outputFile.close();
+
 	}
 }
 
@@ -218,7 +217,6 @@ Mat canny::nonMaxSupp()
     for (int i=1; i< sFiltered.rows - 1; i++) {
         for (int j=1; j<sFiltered.cols - 1; j++) {
             float Tangent = angles.at<float>(i,j);
-            //cout << (int16_t)Tangent << endl; //*************************************Dave: need to convert angles to 16 bit int to send to fpga
             nonMaxSupped.at<uchar>(i-1, j-1) = sFiltered.at<uchar>(i,j);
             //Horizontal Edge
             if (((-22.5 < Tangent) && (Tangent <= 22.5)) || ((157.5 < Tangent) && (Tangent <= -157.5)))
@@ -248,21 +246,6 @@ Mat canny::nonMaxSupp()
             }
         }
     }
-
-
-    //print out sfiltered here
-    //for(int i = 0; i < sFiltered.rows -1; i++){
-       // for(int j=0; j < sFiltered.cols -1; j++){
-           // cout << "(" << i << ", " << j << ") = " << sFiltered.at<uint16_t>(i,j) << endl;
-        //}
-   // }
-
-    //for(int i = 0; i < sFiltered.rows -1; i++){
-       //for(int j=0; j < sFiltered.cols -1; j++){
-          //  cout << "(" << i << ", " << j << ") = " << angles.at<float>(i,j) << endl;
-       // }
-   // }
-   
 
     return nonMaxSupped;
 }
@@ -336,4 +319,52 @@ Mat canny::threshold(Mat imgin,int low, int high)
         }
     }
     return EdgeMat;
+}
+
+Mat canny::readFPGA(){
+
+    //here we read in the output values from the FPGA, then print the image it produced
+    ifstream inputFile;
+    inputFile.open("hw_outputs.csv");
+
+    if(!inputFile.is_open()){
+        cout << "\nError opening csv file!" << endl;
+    }
+
+    string::size_type sz;
+    string in_string;
+    
+    //first three values in csv file are rows, cols, transferTime, and hwExecutionTime
+    getline(inputFile, in_string, ','); //read in the number of rows value (max = 1080)
+    unsigned num_rows = unsigned(stoi(in_string, &sz, 10));
+
+    getline(inputFile, in_string, ','); //read in the number of cols value (max = 1920)
+    unsigned num_cols = unsigned(stoi(in_string, &sz, 10)); //convert string to int
+
+    getline(inputFile, in_string, ','); //read in the time it took to generate the hw inputs
+    double transferTime = atof(in_string.c_str()); //convert string to double
+
+    getline(inputFile, in_string, '\n'); //read in the time it took to generate the hw inputs
+    double hwTime = atof(in_string.c_str()); //convert string to double
+
+    Mat returnMat = Mat(num_rows, num_cols, CV_8UC1); //r x c in size and contains 8 bit values (0-255)
+
+    int i = 0;
+
+    while(getline(inputFile, in_string, '\n')){
+
+        for(int j = 0; j < num_cols; j++){
+
+            returnMat.at<uchar>(i,j) = unsigned(stoi(in_string, &sz, 10));
+
+        }
+        i++;
+
+    }
+
+    cout << "\nThe FPGA took " << transferTime << " seconds in transfer time, and " << hwTime << " seconds to do the canny algorithm" << endl;
+
+
+    return returnMat;
+
 }

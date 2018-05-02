@@ -9,7 +9,7 @@ use work.config_pkg.all;
 
 package user_pkg is
 
-    constant C_MEM_ADDR_WIDTH : positive := 21;
+    constant C_MEM_ADDR_WIDTH : positive := 18;
     constant C_MEM_IN_WIDTH   : positive := 32;
     constant C_MEM_OUT_WIDTH  : positive := 8;
 
