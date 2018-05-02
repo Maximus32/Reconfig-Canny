@@ -30,15 +30,25 @@ begin
     if rst = '1' then
       data_out <= '0';
       counter <= (others => '0');
-    elsif clk'event and clk = '1' then
-      if counter = std_logic_vector(unsigned(delay_time) - 1) then
-        data_out <= data_in;
-      else
-        data_out <= '0';
-        counter <= std_logic_vector(unsigned(counter) + 1);
+    elsif rising_edge(clk) then --when the wr_en goes high
+      if data_in = '1' then
+        if counter = std_logic_vector(unsigned(delay_time) - 1) then
+          data_out <= '1';
+        else
+          data_out <= '0';
+          counter <= std_logic_vector(unsigned(counter) + 1);
+        end if;
+
+      elsif data_in = '0' then
+        if counter >= std_logic_vector(unsigned(delay_time) - 1) and counter < std_logic_vector(unsigned(delay_time) + unsigned(delay_time) - 1) then --count the same number of times to print another row
+          counter <= std_logic_vector(unsigned(counter) + 1);
+          data_out <= '1';
+        else
+          data_out <= '0';
+        end if;
+
       end if;
     end if;
-
   end process;
 
 end behavior;

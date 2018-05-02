@@ -53,6 +53,7 @@ architecture default of user_app is
     --temp signals for datapath
     signal valid_in_bit : std_logic;
 
+    signal mem_in_rst_addr   : std_logic;
     signal reset_addresses   : std_logic;
     signal address_in_enable : std_logic;
     signal wr_en_2           : std_logic;
@@ -131,21 +132,18 @@ begin
     addr_delay1to2_en : entity work.reg_sync
       port map(
         clk => clk,
-        rst => reset_addresses,
+        rst => rst,--reset_addresses,
         delay_time => num_cols, --this comes from the memory_map and will be used to determine the delay for an entire row of image
         data_in => mem_in_wr_en,
         data_out => wr_en_2
       );
 
-    addr_input_delay1to2 : entity work.reg_n_sync
-      generic map(
-        reg_width => C_MEM_ADDR_WIDTH
-      )
-      port map(
-        clk => clk,
-        rst => '0', --might need to change later during testing
-        data_in => mem_in_wr_addr,
-        data_out => mem_in_wr_addr2
+      addr_mem2 : entity work.address_gen_other_ram
+        port map(
+          clk      => clk,
+          rst      => mem_in_rst_addr,
+          en       => wr_en_2,
+          addr_out => mem_in_wr_addr2
       );
 
     -- input memory
@@ -161,7 +159,7 @@ begin
             wen   => wr_en_2,
             waddr => mem_in_wr_addr2,
             wdata => mem_in_wr_data,
-            raddr => mem_in_rd_addr,  -- TODO: connect to input address generator
+            raddr => mem_in_rd_addr,
             rdata => mem_in_rd_data2);
 
     -- Pre-processing to truncate magnitudes and directionals
@@ -177,22 +175,19 @@ begin
     addr_delay2to3_en : entity work.reg_sync
       port map(
         clk => clk,
-        rst => reset_addresses,
+        rst => rst,--reset_addresses,
         delay_time => num_cols,
         data_in => wr_en_2,
         data_out => wr_en_3
       );
 
-    addr_input_delay2to3 : entity work.reg_n_sync
-      generic map(
-        reg_width => C_MEM_ADDR_WIDTH
-      )
+    addr_mem3 : entity work.address_gen_other_ram
       port map(
-        clk => clk,
-        rst => '0', --might need to change later during testing
-        data_in => mem_in_wr_addr2,
-        data_out => mem_in_wr_addr3
-      );
+        clk      => clk,
+        rst      => mem_in_rst_addr,
+        en       => wr_en_3,
+        addr_out => mem_in_wr_addr3
+    );
 
     -- input memory
     -- written to by memory map
@@ -245,8 +240,8 @@ begin
   );
 
   -- Memory out data is the threholded output
-  mem_out_wr_data <= (0 => thresh_out(0), others => '0');
-
+  --mem_out_wr_data <= (0 => thresh_out(0), others => '0');
+  mem_out_wr_data <= (others => thresh_out(0));
 	------------------------------------------------------------------------------
     -- output memory
     -- written to by controller+datapath
@@ -258,7 +253,7 @@ begin
             addr_width => C_MEM_ADDR_WIDTH)
         port map (
             clk   => clk,
-            wen   => mem_out_wr_en,
+            wen   => valid_in_bit,
             waddr => mem_out_wr_addr,  -- TODO: connect to output address generator
             wdata => mem_out_wr_data,
             raddr => mem_out_rd_addr,
@@ -289,7 +284,8 @@ begin
       valid_data => valid_in_bit,
       size_out => size_signal,
       addr_in_en => address_in_enable,
-      rst_addr => reset_addresses
+      rst_addr => reset_addresses,
+      rst_in_addr => mem_in_rst_addr
     );
 
     mem_out_address : entity work.addr_gen

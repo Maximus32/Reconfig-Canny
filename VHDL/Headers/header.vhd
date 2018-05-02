@@ -98,7 +98,7 @@ package canny_header is
   function cnv_u (num : integer; size : positive) return unsigned;
   function cnv_to_int (input : std_logic_vector) return integer;
   function cnv_to_int (input : unsigned) return integer;
-  
+
   function extract_dir_set (blk : grd_pair_blk) return grd_dir_set;
   function extract_magn_blk (blk : grd_pair_blk) return grd_magn_blk;
 end canny_header ;
@@ -144,7 +144,7 @@ package body canny_header is
   begin
     return to_integer(input);
   end cnv_to_int;
-  
+
   -- Function "extract directional set"
   -- Accepts a gradient pair block
   -- Returns the directional set
@@ -152,17 +152,17 @@ package body canny_header is
     variable dir_set : grd_dir_set ;
   begin
     dir_set(0) := blk(4).dir ;
-    
+
     return dir_set;
   end extract_dir_set;
-  
+
   -- Function "extract magnitude set"
   -- Accepts a gradient pair block
   -- Returns the magnitude set
   function extract_magn_blk (blk : grd_pair_blk) return grd_magn_blk is
     variable magn_set : grd_magn_blk ;
   begin
-    for i in 0 to BLOCK_W-2-1 loop
+    for i in 0 to BLOCK_SIZE-1 loop
       magn_set(i) := blk(i).magn;
     end loop;
     return magn_set;
